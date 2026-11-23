@@ -41,16 +41,14 @@ s, done = splice(s, old, new)
 until not done
 return s
 end
-src = rep(src, '"layout-dashboard"', '"flame"')
-src = rep(src, '"shield-cog-corner"', '"swords"')
-src = rep(src, '"locate-fixed"', '"crosshair"')
+src = rep(src, '"layout-dashboard"', '"house"')
+src = rep(src, '"shield-cog-corner"', '"shield"')
+src = rep(src, '"locate-fixed"', '"swords"')
 src = rep(src, '"clapperboard"', '"person-standing"')
 src = rep(src, '"rotate-3d"', '"radiation"')
-src = rep(src, '"blocks"', '"bomb"')
 src = rep(src, '"bubbles"', '"eye"')
 src = rep(src, '"keyboard"', '"mouse-pointer-click"')
 src = rep(src, '"server"', '"zap"')
-src = rep(src, '"cog"', '"wrench"')
 local old_icons = 'local FetchIcons, Icons = pcall(function()\n    return (loadstring(\n        game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua")\n    ) :: () -> IconModule)()\nend)'
 local new_icons = 'local FetchIcons, Icons = pcall(function()\n    return (loadstring([=====[\n' .. ico .. '\n]=====]) :: any)()\nend)'
 lib, ok1 = splice(lib, old_icons, new_icons)
