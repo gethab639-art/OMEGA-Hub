@@ -23,3 +23,28 @@ local R={} for i=1,#A do R[A:sub(i,i)]=i-1 end
 local r={}
 local v=0
 local bn=0
+for i=1,#b do
+local c=R[b:sub(i,i)]
+if c then
+v=v*64+c
+bn=bn+6
+if bn>=8 then
+bn=bn-8
+r[#r+1]=string.char(math.floor(v/2^bn)%256)
+end
+end
+end
+return table.concat(r)
+end
+local function _X(s,k)
+local t=table.create(#s)
+for i=1,#s do t[i]=string.char(bit32.bxor(string.byte(s,i),k)) end
+return table.concat(t)
+end
+local src=_X(dc(_D),_K)
+if #src~=_L then error("[OMEGA] payload corrupted while pasting - re-copy the whole code") end
+local sum=0
+for i=1,#src do sum=(sum+string.byte(src,i)*i)%4294967296 end
+if sum~=_S then error("[OMEGA] payload corrupted while pasting - re-copy the whole code") end
+local ok,err=pcall(assert(loadstring(src)))
+if not ok then error("[OMEGA] runtime: "..tostring(err)) end
