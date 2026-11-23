@@ -124,8 +124,8 @@ end
 ]===]
 src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
 "pcall(function() SaveManager:LoadAutoloadConfig() end)\n" .. OMEGA_UI)
-local st = "[\"UI Settings\"] = Window:AddTab({ Name = \"Settings\", Description = \"UI and Config\", Icon = \"cog\" }),"
-local me = st .. "\n\t\t[\"Music_OMEGA\"] = Window:AddTab({ Name = \"Music\", Description = \"OMEGA\", Icon = \"headphones\" }),"
+local st = "[\"UI Settings\"] = Window:AddTab("
+local me = "[\"Music_OMEGA\"] = Window:AddTab({ Name = \"Music\", Description = \"OMEGA\", Icon = \"headphones\" }),\n\t\t" .. st
 src, _ = splice(src, st, me)
 src, _ = splice(src, st, me)
 src, _ = splice(src, "EnableSidebarResize = true,",
