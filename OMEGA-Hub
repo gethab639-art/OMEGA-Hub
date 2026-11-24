@@ -1,0 +1,155 @@
+warn("[Omega Hub] v3.0 — новая версия загружена " .. os.date("%H:%M:%S"))
+pcall(setfpscap, 999)
+if typeof(getgenv) ~= "function" then getgenv = function() return _G end end
+if typeof(writefile) ~= "function" then writefile = function() return false end end
+if typeof(readfile) ~= "function" then readfile = function() return nil end end
+if typeof(delfile) ~= "function" then delfile = function() end end
+if typeof(isfile) ~= "function" then isfile = function() return false end end
+if typeof(isfolder) ~= "function" then isfolder = function() return false end end
+if typeof(makefolder) ~= "function" then makefolder = function() end end
+if typeof(listfiles) ~= "function" then listfiles = function() return {} end end
+if typeof(setclipboard) ~= "function" then setclipboard = function() return false end end
+if typeof(getcustomasset) ~= "function" then getcustomasset = function() return nil end end
+local function splice(s, old, new)
+local a, b = s:find(old, 1, true)
+if not a then return s, false end
+return s:sub(1, a - 1) .. new .. s:sub(b + 1), true
+end
+local function dl(url, min)
+local body = nil
+local ok = pcall(function() body = game:HttpGet(url) end)
+if not (ok and type(body) == "string" and #body > (min or 1000)) then
+local mirror = url:gsub("^https://raw%.githubusercontent%.com/([^/]+)/([^/]+)/refs/heads/([^/]+)/(.+)$",
+"https://cdn.jsdelivr.net/gh/%1/%2@%3/%4")
+if mirror ~= url then
+ok = pcall(function() body = game:HttpGet(mirror) end)
+end
+end
+assert(ok and type(body) == "string" and #body > (min or 1000),
+"[Omega Hub] Не скачался (и через зеркало тоже): " .. url)
+return body
+end
+local src = dl("https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua", 100000)
+local lib = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua", 100000)
+local tm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua", 1000)
+local sm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua", 1000)
+local ico = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua", 10000)
+ico = ico:gsub("lucide%-icons", "omega-lucide-icons")
+src = src:gsub('Title = "Nil\'e"', 'Title = "OMEGA Hub"')
+local function rep(s, old, new)
+repeat
+local done
+s, done = splice(s, old, new)
+until not done
+return s
+end
+src = rep(src, '"layout-dashboard"', '"house"')
+src = rep(src, '"shield-cog-corner"', '"shield"')
+src = rep(src, '"locate-fixed"', '"swords"')
+src = rep(src, '"clapperboard"', '"mouse-pointer"')
+src = rep(src, '"rotate-3d"', '"radiation"')
+src = rep(src, '"bubbles"', '"eye"')
+src = rep(src, '"server"', '"settings-2"')
+local old_icons = 'local FetchIcons, Icons = pcall(function()\n    return (loadstring(\n        game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua")\n    ) :: () -> IconModule)()\nend)'
+local new_icons = 'local FetchIcons, Icons = pcall(function()\n    return (loadstring([=====[\n' .. ico .. '\n]=====]) :: any)()\nend)'
+lib, ok1 = splice(lib, old_icons, new_icons)
+if not ok1 then warn("[Omega Hub] якорь иконок не найден — грузим Icons напрямую") end
+src, _ = splice(src, "setfpscap(999)", "-- setfpscap: защищено лоадером\npcall(setfpscap, 999)")
+local m1 = 'if workspace:FindFirstChild("VoidPlatform") then'
+local m2 = "local function fn16()"
+local i0, i1 = src:find(m1, 1, true), nil
+if i0 then
+i1 = src:find(m2, i0, true)
+end
+if i0 and i1 then
+local block = src:sub(i0, i1 - 1):match("^(.-)%s*$")
+src = src:sub(1, i0 - 1) .. "pcall(function()\n" .. block .. "\nend)\n\n" .. src:sub(i1)
+else
+warn("[Omega Hub] якорь блока карты не найден — пропускаю патч")
+end
+local OMEGA_UI = [===[
+do
+local M = Tabs.Tracks_OMEGA or Window:AddTab({ Name = "Tracks", Description = "OMEGA", Icon = "headphones" })
+local SS = game:GetService("SoundService")
+local T = "TOMA FUNK PHONK=129098116998483;AURA = ∞ (Brazilian Phonk)=95131770144654;ROBLOX PHONK=136932193331774;FUNK FESTA=103409297553965;DRIFT NIGHT PHONK (Car Motion Edit)=85735197482652;Rat Dance Phonk=119598380829349;Lost Phonk=139266399633943;Noisestorm - Crab Rave=5410086218;LIKE THE MOONLIGHT (Funky House Mix)=111560286322896;sad violin=135308045;Funky Stepper=1835422714;Terranova=1835422879;Russian Run=1836175982;Russian Sorrow=1836176147;Russian Celebration=1836732530;Tokyo Drift=1837015626;Paradise Falls=1837879082;Clair De Lune=1838457617;Russian Folk Dance=1840183276;Soviet March=1841140365;Life in an Elevator=1841647093;Believer=1845016505;Montage No. 19=1845091827;Schweben Im Raum=1845728301;Town Talk=1845756489;National Anthem Of China B=1845918434;Kalinka=1845924062;Morning Mood (peer Gynt Suite No.1)=1846088038;Wake Up=1846293018;The Nutcracker (D) Russian Dance=1846627685;Nutcracker Suite Op.71a, The @ Russian Dance=1848059091;Horror=9039981149;State Anthem of the Russian Federation (a)=9040163991;State Anthem of the Russian Federation (b 60)=9040168257;Just a Russian Waltz - No intro=9044560194;Phonk Vol. 2 - The Final Phonk=14145620056;PHONK DRIFT=72653741821355;alone=75485931767123;SHADOW PHONK BRAZIL (Dark Atmosphere Edit)=77701977147898;Wheel=87871612084824;Miguel Phonk=92299938059573;Bao Bao=95796504549340;ELECTRIC PHANTOM (Phonk)=103415930328599;Rogue City Phonk=111109407506851;Tung Tung Tung Sahur Phonk=128438366056581;TIKI TIKI FUNK (Sped Up)=128510578554487;Phonk Roblox Meme=135209837340816;Blood on the Asphalt=140439256760765;Football Edit – Phonk Trap=140504265985079;Voltstorm (Overload Phonk Energy)=140580823167015;Desprezo, (Aggressive Phonk), Slowed + Reverb=140667339171815;HYDERABADI PHONK (MARFA STYLE)=140691985128867;Elpaparon=121336955981923;test1=86255623393834;Лава Лава=115410878431589;russian mem=128015593975204"
+local Tr, Or = {}, {}
+for e in T:gmatch("[^;]+") do local n, i = e:match("^(.-)=(%d+)$") Tr[n] = i Or[#Or+1] = n end
+table.sort(Or)
+local o = { Snd = nil, Track = nil, Vol = 50, Pause = false }
+local G = M:AddLeftGroupbox("Плеер")
+local L = G:AddLabel("🎵 Трек не играет")
+local B
+local function StopM()
+if o.Snd then pcall(function() o.Snd:Stop() end) pcall(function() o.Snd:Destroy() end) o.Snd = nil end
+o.Pause = false
+pcall(function() B:SetText("▶") end)
+pcall(function() L:SetText("🎵 Трек не играет") end)
+end
+local function Play(n)
+StopM()
+local id = Tr[n]
+if not id then return end
+local s = Instance.new("Sound")
+s.SoundId = "rbxassetid://" .. id
+s.Volume = o.Vol / 50
+s.Parent = SS
+local t0 = os.clock()
+while not s.IsLoaded and os.clock() - t0 < 5 do task.wait(0.1) end
+if not s.IsLoaded or s.TimeLength == 0 then pcall(function() s:Destroy() end) pcall(function() Library:Notify("Трек не загрузился") end) return end
+o.Snd = s
+o.Track = n
+o.Pause = false
+s:Play()
+pcall(function() B:SetText("| |") end)
+pcall(function() L:SetText("🎵 " .. n) end)
+end
+local function Skip(d)
+local x = 1
+for i, n in ipairs(Or) do if n == o.Track then x = i break end end
+Play(Or[((x - 1 + d) % #Or) + 1])
+end
+G:AddDropdown("OMEGAMusicTrack", { Values = Or, Multi = false, AllowNull = true, Searchable = true, Text = "Трек", Callback = function(v) if type(v) == "string" and Tr[v] then Play(v) end end })
+G:AddSlider("OMEGAMusicVolume", { Text = "Громкость (%)", Default = 50, Min = 0, Max = 100, Rounding = 0, Callback = function(v) o.Vol = v if o.Snd then pcall(function() o.Snd.Volume = v / 50 end) end end })
+local R = G:AddButton({ Text = "<<", Func = function() Skip(-1) end })
+B = R:AddButton({ Text = "▶", Func = function()
+local s = o.Snd
+if not s then Skip(1) return end
+if o.Pause then
+pcall(function() s:Resume() end) o.Pause = false pcall(function() B:SetText("| |") end)
+else
+pcall(function() s:Pause() end) o.Pause = true pcall(function() B:SetText("▶") end)
+end
+end })
+R:AddButton({ Text = ">>", Func = function() Skip(1) end })
+pcall(function() Library:OnUnload(StopM) end)
+end
+]===]
+src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
+"pcall(function() SaveManager:LoadAutoloadConfig() end)\n" .. OMEGA_UI)
+local st = "[\"UI Settings\"] = Window:AddTab("
+local me = "[\"Tracks_OMEGA\"] = Window:AddTab({ Name = \"Tracks\", Description = \"OMEGA\", Icon = \"headphones\" }),\n\t\t" .. st
+src, _ = splice(src, st, me)
+src, _ = splice(src, st, me)
+src, _ = splice(src, "EnableSidebarResize = true,",
+"EnableSidebarResize = true,\nEnableCompacting = true,\nSidebarCompacted = true,\nMinSidebarWidth = 200,\nSidebarCompactWidth = 56,")
+src, _ = splice(src, "Window:SetSidebarWidth(125)",
+"Window:SetSidebarWidth(125)\nWindow:SetCompact(true)")
+_load = function(code, tag)
+local ok, res = pcall(loadstring(code))
+if ok and res then
+_G["NILE_" .. tag] = res
+else
+warn("[Omega Hub] модуль " .. tag .. " не загрузился: " .. tostring(res))
+end
+end
+_load(lib, "LIB"); _load(tm, "TM"); _load(sm, "SM")
+assert(_G.NILE_LIB, "[Omega Hub] библиотека UI не загрузилась — запуск невозможен")
+if not _G.NILE_TM then _G.NILE_TM = setmetatable({}, { __index = function() return function() end end }) end
+if not _G.NILE_SM then _G.NILE_SM = setmetatable({}, { __index = function() return function() end end }) end
+src, _ = splice(src, 'Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua"))()', "Library = _G.NILE_LIB")
+src, _ = splice(src, 'ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua"))()', "ThemeManager = _G.NILE_TM")
+src, _ = splice(src, 'SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua"))()', "SaveManager = _G.NILE_SM")
+local ok, err = pcall(loadstring(src))
+if not ok then
+error("[Omega Hub] ошибка запуска: " .. tostring(err))
+end
