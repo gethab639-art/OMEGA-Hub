@@ -15,6 +15,12 @@ local a, b = s:find(old, 1, true)
 if not a then return s, false end
 return s:sub(1, a - 1) .. new .. s:sub(b + 1), true
 end
+local function splice_last(s, old, new)
+local a = s:reverse():find(old:reverse(), 1, true)
+if not a then return s, false end
+local b = #s - a - #old + 2
+return s:sub(1, b - 1) .. new .. s:sub(b), true
+end
 local function dl(url, min)
 local body = nil
 local ok = pcall(function() body = game:HttpGet(url) end)
@@ -129,6 +135,7 @@ src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
 local st = "[\"UI Settings\"] = Window:AddTab("
 local me = "[\"Tracks_OMEGA\"] = Window:AddTab({ Name = \"Tracks\", Description = \"OMEGA\", Icon = \"headphones\" }),\n\t\t" .. st
 src, _ = splice(src, st, me)
+src, _ = splice_last(src, st, me)
 src, _ = splice(src, "EnableSidebarResize = true,",
 "EnableSidebarResize = true,\nEnableCompacting = true,\nSidebarCompacted = true,\nMinSidebarWidth = 200,\nSidebarCompactWidth = 56,")
 src, _ = splice(src, "Window:SetSidebarWidth(125)",
