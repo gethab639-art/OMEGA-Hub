@@ -152,4 +152,4 @@ src, _ = splice(src, 'SaveManager = loadstring(game:HttpGet("https://raw.githubu
 local ok, err = pcall(loadstring(src))
 if not ok then
 error("[Omega Hub] ошибка запуска: " .. tostring(err))
-end
+end 
