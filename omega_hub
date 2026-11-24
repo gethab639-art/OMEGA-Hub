@@ -50,8 +50,17 @@ src = rep(src, '"clapperboard"', '"mouse-pointer"')
 src = rep(src, '"rotate-3d"', '"radiation"')
 src = rep(src, '"bubbles"', '"eye"')
 src = rep(src, '"server"', '"settings-2"')
-local old_icons = 'local FetchIcons, Icons = pcall(function()\n    return (loadstring(\n        game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua")\n    ) :: () -> IconModule)()\nend)'
-local new_icons = 'local FetchIcons, Icons = pcall(function()\n    return (loadstring([=====[\n' .. ico .. '\n]=====]) :: any)()\nend)'
+local old_icons = "local FetchIcons, Icons = pcall(function()" ..
+"\n    return (loadstring(" ..
+"\n        game:HttpGet(\"https://raw.githubusercontent.com/" ..
+"ludicious-claw/sssss/refs/heads/main/Icons.Lua\")" ..
+"\n    ) :: () -> IconModule)()" ..
+"\nend)"
+local new_icons = "local FetchIcons, Icons = pcall(function()" ..
+"\n    return (loadstring([=====[" ..
+"\n" .. ico ..
+"\n]=====]) :: any)()" ..
+"\nend)"
 lib, ok1 = splice(lib, old_icons, new_icons)
 if not ok1 then warn("[Omega Hub] якорь иконок не найден — грузим Icons напрямую") end
 src, _ = splice(src, "setfpscap(999)", "-- setfpscap: защищено лоадером\npcall(setfpscap, 999)")
@@ -67,6 +76,44 @@ src = src:sub(1, i0 - 1) .. "pcall(function()\n" .. block .. "\nend)\n\n" .. src
 else
 warn("[Omega Hub] якорь блока карты не найден — пропускаю патч")
 end
+local OMEGA_TFIX = [===[
+task.spawn(function()
+local last
+while task.wait(1.5) do
+if BlobmanLoopTargetEnabled then
+pcall(function()
+local _, _, hum = GetHRH(char)
+local okt, tgt = pcall(GetFirstTarget)
+tgt = okt and tgt or nil
+local seat = hum and hum.Health > 0 and hum.SeatPart
+local sitting = seat and seat.Parent
+and seat.Parent:FindFirstChild("HumanoidCreature")
+local msg
+if not tgt then
+msg = "Цель не выбрана — добавь игрока в Target List"
+elseif not sitting then
+msg = "САЖАЮ В БЛОБМАНА — включаю Auto Sit"
+pcall(function() Toggles.AutoSitToggle:SetValue(true) end)
+else
+local bs = seat.Parent:FindFirstChild("BlobmanSeatAndOwnerScript")
+if not bs or not bs:FindFirstChild("CreatureGrab") then
+msg = "CreatureGrab пропал — игра обновилась"
+end
+end
+if msg and msg ~= last then
+pcall(function() Library:Notify({ Title = "OMEGA Hub",
+Description = msg, Time = 4, BigIcon = "info" }) end)
+last = msg
+elseif not msg then
+last = nil
+end
+end)
+end
+end
+end)
+]===]
+src, _ = splice(src, 'LTRB:AddDropdown("BlobmanLoopMethodDropdown", {',
+OMEGA_TFIX .. "\nLTRB:AddDropdown(\"BlobmanLoopMethodDropdown\", {")
 src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
 "pcall(function() SaveManager:LoadAutoloadConfig() end)")
 src, _ = splice(src, "EnableSidebarResize = true,",
