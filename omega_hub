@@ -76,44 +76,89 @@ src = src:sub(1, i0 - 1) .. "pcall(function()\n" .. block .. "\nend)\n\n" .. src
 else
 warn("[Omega Hub] якорь блока карты не найден — пропускаю патч")
 end
-local OMEGA_TFIX = [===[
+local OMEGA_RT = [===[
+LTRB:AddToggle("BlobmanLoopTargetToggle", {
+Text = "Loop Target",
+Default = false,
+Callback = function(arg)
+BlobmanLoopTargetEnabled = arg
+if not arg then
+local t0 = GetFirstTarget()
+local _, tp = t0 and t0.Character and GetHRH(t0.Character)
+local b = tp and tp:FindFirstChild("OMEGALock")
+if b then b:Destroy() end
+return
+end
+local GF = game:GetService("ReplicatedStorage"):WaitForChild("Grab", 5)
+local SNO = GF and GF:WaitForChild("SetNetworkOwner", 2)
+local DGL = GF and GF:WaitForChild("DestroyGrabLine", 2)
+local function isown(p)
+if not (p and p.Parent) then return false end
+local h = p.Parent:FindFirstChild("Head")
+local a = p:FindFirstChild("PartOwner") or h and h:FindFirstChild("PartOwner")
+return (a and a.Value == LocalPlayer.Name)
+or ((p.AssemblyRootPart or p).ReceiveAge == 0)
+end
+local function own(p)
+local _, rp, hm = GetHRH(char)
+local n = tick()
+while p.Parent and not isown(p) and tick() - n < 1.2
+and rp and hm and hm.Health > 0 do
+local c = (rp.CFrame - rp.Position) + p.Position
+if SNO then pcall(function() SNO:FireServer(p, c) end) end
+task.wait(0.05)
+end
+return isown(p)
+end
 task.spawn(function()
-local last
-while task.wait(1.5) do
-if BlobmanLoopTargetEnabled then
-pcall(function()
-local _, _, hum = GetHRH(char)
-local okt, tgt = pcall(GetFirstTarget)
-tgt = okt and tgt or nil
-local seat = hum and hum.Health > 0 and hum.SeatPart
-local sitting = seat and seat.Parent
-and seat.Parent:FindFirstChild("HumanoidCreature")
-local msg
-if not tgt then
-msg = "Цель не выбрана — добавь игрока в Target List"
-elseif not sitting then
-msg = "САЖАЮ В БЛОБМАНА — включаю Auto Sit"
-pcall(function() Toggles.AutoSitToggle:SetValue(true) end)
-else
-local bs = seat.Parent:FindFirstChild("BlobmanSeatAndOwnerScript")
-if not bs or not bs:FindFirstChild("CreatureGrab") then
-msg = "CreatureGrab пропал — игра обновилась"
+while BlobmanLoopTargetEnabled and task.wait(0.1) do
+local _, rp, hm = GetHRH(char)
+if not (hm and hm.Health > 0) then continue end
+local sp = hm.SeatPart
+if not (sp and sp.Parent and sp.Parent:FindFirstChild("HumanoidCreature")) then
+local blob = toysFolder:FindFirstChild("CreatureBlobman")
+local seat = blob and blob:FindFirstChild("VehicleSeat")
+if blob and not seat then DestroyT(blob) blob = nil end
+if not blob and rp then
+blob = NewToy("CreatureBlobman", rp.CFrame * CFrame.new(0, 15, 20))
+seat = blob and blob:WaitForChild("VehicleSeat", 1)
+if blob and not seat then DestroyT(blob) blob = nil end
 end
+if seat and hm then pcall(function() seat:Sit(hm) end) end
+continue
 end
-if msg and msg ~= last then
-pcall(function() Library:Notify({ Title = "OMEGA Hub",
-Description = msg, Time = 4, BigIcon = "info" }) end)
-last = msg
-elseif not msg then
-last = nil
+local t = GetFirstTarget()
+local _, trp, thm = t and t.Character and GetHRH(t.Character)
+if not (trp and thm and thm.Health > 0 or own(trp)) then continue end
+if BlobmanLoopMethod == "Kill" then
+thm.BreakJointsOnDeath = false
+thm:ChangeState(Enum.HumanoidStateType.Dead)
+elseif BlobmanLoopMethod == "Lock" then
+if not trp:FindFirstChild("OMEGALock") then
+local bp = Instance.new("BodyPosition", trp)
+bp.Name, bp.Position, bp.D = "OMEGALock", trp.Position, 100
+bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+end
+elseif BlobmanLoopMethod == "Kick [Instant]" or BlobmanLoopMethod == "Kick [Loop]" then
+local bp = trp:FindFirstChild("OMEGALock")
+if bp then bp:Destroy() end
+pcall(function() trp.CFrame = CFrame.new(0, 9e9, 0) end)
+pcall(function() trp.AssemblyLinearVelocity = Vector3.new(0, 9e9, 0) end)
+task.delay(0.35, function() if DGL then pcall(function() DGL:FireServer(trp) end) end end)
+end
 end
 end)
-end
-end
-end)
+end,
+})
 ]===]
-src, _ = splice(src, 'LTRB:AddDropdown("BlobmanLoopMethodDropdown", {',
-OMEGA_TFIX .. "\nLTRB:AddDropdown(\"BlobmanLoopMethodDropdown\", {")
+
+local ra = src:find('LTRB:AddToggle("BlobmanLoopTargetToggle"', 1, true)
+local rz = src:find('CTR:AddToggle("RagdollTargetToggle"', 1, true)
+if ra and rz and rz > ra then
+src = src:sub(1, ra - 1) .. OMEGA_RT .. "\n\n" .. src:sub(rz)
+else
+warn("[Omega Hub] якоря Loop Target не найдены — пропускаю патч")
+end
 src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
 "pcall(function() SaveManager:LoadAutoloadConfig() end)")
 src, _ = splice(src, "EnableSidebarResize = true,",
