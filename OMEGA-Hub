@@ -1,3 +1,4 @@
+warn("[Omega Hub] v3.0 — новая версия загружена " .. os.date("%H:%M:%S"))
 pcall(setfpscap, 999)
 if typeof(getgenv) ~= "function" then getgenv = function() return _G end end
 if typeof(writefile) ~= "function" then writefile = function() return false end end
@@ -33,6 +34,7 @@ local lib = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/head
 local tm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua", 1000)
 local sm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua", 1000)
 local ico = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua", 10000)
+ico = ico:gsub("lucide%-icons", "omega-lucide-icons")
 src = src:gsub('Title = "Nil\'e"', 'Title = "OMEGA Hub"')
 local function rep(s, old, new)
 repeat
@@ -67,7 +69,7 @@ warn("[Omega Hub] якорь блока карты не найден — про�
 end
 local OMEGA_UI = [===[
 do
-local M = Tabs.Music_OMEGA or Window:AddTab({ Name = "Music", Description = "OMEGA", Icon = "headphones" })
+local M = Tabs.Tracks_OMEGA or Window:AddTab({ Name = "Tracks", Description = "OMEGA", Icon = "headphones" })
 local SS = game:GetService("SoundService")
 local T = "TOMA FUNK PHONK=129098116998483;AURA = ∞ (Brazilian Phonk)=95131770144654;ROBLOX PHONK=136932193331774;FUNK FESTA=103409297553965;DRIFT NIGHT PHONK (Car Motion Edit)=85735197482652;Rat Dance Phonk=119598380829349;Lost Phonk=139266399633943;Noisestorm - Crab Rave=5410086218;LIKE THE MOONLIGHT (Funky House Mix)=111560286322896;sad violin=135308045;Funky Stepper=1835422714;Terranova=1835422879;Russian Run=1836175982;Russian Sorrow=1836176147;Russian Celebration=1836732530;Tokyo Drift=1837015626;Paradise Falls=1837879082;Clair De Lune=1838457617;Russian Folk Dance=1840183276;Soviet March=1841140365;Life in an Elevator=1841647093;Believer=1845016505;Montage No. 19=1845091827;Schweben Im Raum=1845728301;Town Talk=1845756489;National Anthem Of China B=1845918434;Kalinka=1845924062;Morning Mood (peer Gynt Suite No.1)=1846088038;Wake Up=1846293018;The Nutcracker (D) Russian Dance=1846627685;Nutcracker Suite Op.71a, The @ Russian Dance=1848059091;Horror=9039981149;State Anthem of the Russian Federation (a)=9040163991;State Anthem of the Russian Federation (b 60)=9040168257;Just a Russian Waltz - No intro=9044560194;Phonk Vol. 2 - The Final Phonk=14145620056;PHONK DRIFT=72653741821355;alone=75485931767123;SHADOW PHONK BRAZIL (Dark Atmosphere Edit)=77701977147898;Wheel=87871612084824;Miguel Phonk=92299938059573;Bao Bao=95796504549340;ELECTRIC PHANTOM (Phonk)=103415930328599;Rogue City Phonk=111109407506851;Tung Tung Tung Sahur Phonk=128438366056581;TIKI TIKI FUNK (Sped Up)=128510578554487;Phonk Roblox Meme=135209837340816;Blood on the Asphalt=140439256760765;Football Edit – Phonk Trap=140504265985079;Voltstorm (Overload Phonk Energy)=140580823167015;Desprezo, (Aggressive Phonk), Slowed + Reverb=140667339171815;HYDERABADI PHONK (MARFA STYLE)=140691985128867;Elpaparon=121336955981923;test1=86255623393834;Лава Лава=115410878431589;russian mem=128015593975204"
 local Tr, Or = {}, {}
@@ -125,7 +127,7 @@ end
 src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
 "pcall(function() SaveManager:LoadAutoloadConfig() end)\n" .. OMEGA_UI)
 local st = "[\"UI Settings\"] = Window:AddTab("
-local me = "[\"Music_OMEGA\"] = Window:AddTab({ Name = \"Music\", Description = \"OMEGA\", Icon = \"headphones\" }),\n\t\t" .. st
+local me = "[\"Tracks_OMEGA\"] = Window:AddTab({ Name = \"Tracks\", Description = \"OMEGA\", Icon = \"headphones\" }),\n\t\t" .. st
 src, _ = splice(src, st, me)
 src, _ = splice(src, st, me)
 src, _ = splice(src, "EnableSidebarResize = true,",
