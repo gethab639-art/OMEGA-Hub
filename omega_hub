@@ -35,7 +35,7 @@ local tm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/head
 local sm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua", 1000)
 local ico = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua", 10000)
 ico = ico:gsub("lucide%-icons", "omega-lucide-icons")
-src = src:gsub('Title = "Nil\'e"', 'Title = "OMEGA Hub"')
+src = src:gsub('Title = "Nil\'e"', 'Title = "Нил без ключа"')
 src, _ = splice(src, "CornerRadius = 8,", "Icon = \"rocket\",\nCornerRadius = 20,")
 local function rep(s, old, new)
 repeat
