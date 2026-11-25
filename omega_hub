@@ -36,6 +36,7 @@ local sm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/head
 local ico = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua", 10000)
 ico = ico:gsub("lucide%-icons", "omega-lucide-icons")
 src = src:gsub('Title = "Nil\'e"', 'Title = "OMEGA Hub"')
+src, _ = splice(src, "CornerRadius = 8,", "Icon = \"rocket\",\nCornerRadius = 20,")
 local function rep(s, old, new)
 repeat
 local done
@@ -43,13 +44,13 @@ s, done = splice(s, old, new)
 until not done
 return s
 end
-src = rep(src, '"layout-dashboard"', '"house"')
+src = rep(src, '"layout-dashboard"', '"settings"')
 src = rep(src, '"shield-cog-corner"', '"shield"')
-src = rep(src, '"locate-fixed"', '"swords"')
-src = rep(src, '"clapperboard"', '"mouse-pointer"')
-src = rep(src, '"rotate-3d"', '"radiation"')
+src = rep(src, '"locate-fixed"', '"crosshair"')
+src = rep(src, '"clapperboard"', '"person-standing"')
+src = rep(src, '"rotate-3d"', '"zap"')
 src = rep(src, '"bubbles"', '"eye"')
-src = rep(src, '"server"', '"settings-2"')
+src = rep(src, '"cog"', '"sliders-horizontal"')
 local old_icons = "local FetchIcons, Icons = pcall(function()" ..
 "\n    return (loadstring(" ..
 "\n        game:HttpGet(\"https://raw.githubusercontent.com/" ..
