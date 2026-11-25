@@ -35,7 +35,7 @@ local tm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/head
 local sm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua", 1000)
 local ico = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua", 10000)
 ico = ico:gsub("lucide%-icons", "omega-lucide-icons")
-src = src:gsub('Title = "Nil\'e"', 'Title = "NEIL — NO KEY — V2"')
+src = src:gsub('Title = "Nil\'e"', 'Title = "NEIL NO KEY V2"')
 src, _ = splice(src, "CornerRadius = 8,", "Icon = \"rocket\",\nCornerRadius = 20,")
 local function rep(s, old, new)
 repeat
@@ -83,32 +83,42 @@ src, _ = splice(src, "EnableSidebarResize = true,",
 "EnableSidebarResize = true,\nEnableCompacting = true,\nSidebarCompacted = false,\nMinSidebarWidth = 200,\nSidebarCompactWidth = 56,")
 src, _ = splice(src, "Window:SetSidebarWidth(125)", [====[
 Window:SetSidebarWidth(160)
-task.delay(1, function()
+task.delay(1.5, function()
 pcall(function()
-local core = (typeof(gethui) == "function" and gethui()) or game:GetService("CoreGui")
-if not core then return end
-local gui = core:FindFirstChild("Linoria") or core:FindFirstChildWhichIsA("ScreenGui")
+local gui = (typeof(Library) == "table" and Library.ScreenGui) or nil
 if not gui then return end
-local tb, ttl = nil, nil
 for _, d in ipairs(gui:GetDescendants()) do
-if not tb and d:IsA("Frame") and d.Name:lower():find("top") then tb = d end
-if d:IsA("TextLabel") and d.Name:lower():find("title") then ttl = d end
+if d:IsA("TextLabel") and d.Text == "NEIL NO KEY V2" then
+pcall(function()
+d.TextSize = 13
+d.TextScaled = false
+d.TextTruncate = Enum.TextTruncate.AtEnd
+end)
 end
-if ttl then pcall(function() ttl.TextSize = 13 end) end
-if not tb then tb = gui:FindFirstChildWhichIsA("Frame") end
-if not tb then return end
+end
+local sb = nil
+for _, d in ipairs(gui:GetDescendants()) do
+if d:IsA("TextBox") and (d.Name:lower():find("search") or (d.PlaceholderText or ""):lower():find("search")) then sb = d break end
+end
+if not sb then
+for _, d in ipairs(gui:GetDescendants()) do
+if d:IsA("TextBox") then sb = d break end
+end
+end
+if not sb then return end
 local btn = Instance.new("TextButton")
 btn.Name = "NEILSideToggle"
-btn.Size = UDim2.new(0, 26, 0, 24)
-btn.AnchorPoint = Vector2.new(1, 0)
-btn.Position = UDim2.new(1, -4, 0, 4)
+btn.Size = UDim2.new(0, 24, 0, 24)
+btn.AnchorPoint = Vector2.new(1, 0.5)
+btn.Position = UDim2.new(1, -2, 0.5, 0)
 btn.BackgroundColor3 = Color3.fromRGB(30, 30, 34)
-btn.BackgroundTransparency = 0.2
+btn.BackgroundTransparency = 0.15
 btn.Text = "<<"
 btn.TextColor3 = Color3.new(1, 1, 1)
 btn.Font = Enum.Font.Code
 btn.TextSize = 13
-btn.Parent = tb
+btn.Parent = sb.Parent
+pcall(function() sb.Size = UDim2.new(1, -30, 1, 0) end)
 local wide = true
 btn.MouseButton1Click:Connect(function()
 wide = not wide
