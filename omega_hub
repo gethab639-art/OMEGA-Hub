@@ -80,9 +80,50 @@ end
 src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
 "pcall(function() SaveManager:LoadAutoloadConfig() end)")
 src, _ = splice(src, "EnableSidebarResize = true,",
-"EnableSidebarResize = true,\nEnableCompacting = true,\nSidebarCompacted = true,\nMinSidebarWidth = 200,\nSidebarCompactWidth = 56,")
-src, _ = splice(src, "Window:SetSidebarWidth(125)",
-"Window:SetSidebarWidth(125)\nWindow:SetCompact(true)")
+"EnableSidebarResize = true,\nEnableCompacting = true,\nSidebarCompacted = false,\nMinSidebarWidth = 200,\nSidebarCompactWidth = 56,")
+src, _ = splice(src, "Window:SetSidebarWidth(125)", [====[
+Window:SetSidebarWidth(160)
+task.delay(1, function()
+pcall(function()
+local core = (typeof(gethui) == "function" and gethui()) or game:GetService("CoreGui")
+if not core then return end
+local gui = core:FindFirstChild("Linoria") or core:FindFirstChildWhichIsA("ScreenGui")
+if not gui then return end
+local tb, ttl = nil, nil
+for _, d in ipairs(gui:GetDescendants()) do
+if not tb and d:IsA("Frame") and d.Name:lower():find("top") then tb = d end
+if d:IsA("TextLabel") and d.Name:lower():find("title") then ttl = d end
+end
+if ttl then pcall(function() ttl.TextSize = 13 end) end
+if not tb then tb = gui:FindFirstChildWhichIsA("Frame") end
+if not tb then return end
+local btn = Instance.new("TextButton")
+btn.Name = "NEILSideToggle"
+btn.Size = UDim2.new(0, 26, 0, 24)
+btn.AnchorPoint = Vector2.new(1, 0)
+btn.Position = UDim2.new(1, -4, 0, 4)
+btn.BackgroundColor3 = Color3.fromRGB(30, 30, 34)
+btn.BackgroundTransparency = 0.2
+btn.Text = "<<"
+btn.TextColor3 = Color3.new(1, 1, 1)
+btn.Font = Enum.Font.Code
+btn.TextSize = 13
+btn.Parent = tb
+local wide = true
+btn.MouseButton1Click:Connect(function()
+wide = not wide
+if wide then
+if Window.SetCompact then pcall(Window.SetCompact, Window, false) end
+if Window.SetSidebarWidth then pcall(Window.SetSidebarWidth, Window, 160) end
+btn.Text = "<<"
+else
+if Window.SetCompact then pcall(Window.SetCompact, Window, true) end
+btn.Text = ">>"
+end
+end)
+end)
+end)
+]====])
 _load = function(code, tag)
 local ok, res = pcall(loadstring(code))
 if ok and res then
