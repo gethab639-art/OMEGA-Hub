@@ -1,186 +1,28 @@
-warn("[Omega Hub] v3.0 — новая версия загружена " .. os.date("%H:%M:%S"))
-pcall(setfpscap, 999)
-if typeof(getgenv) ~= "function" then getgenv = function() return _G end end
-if typeof(writefile) ~= "function" then writefile = function() return false end end
-if typeof(readfile) ~= "function" then readfile = function() return nil end end
-if typeof(delfile) ~= "function" then delfile = function() end end
-if typeof(isfile) ~= "function" then isfile = function() return false end end
-if typeof(isfolder) ~= "function" then isfolder = function() return false end end
-if typeof(makefolder) ~= "function" then makefolder = function() end end
-if typeof(listfiles) ~= "function" then listfiles = function() return {} end end
-if typeof(setclipboard) ~= "function" then setclipboard = function() return false end end
-if typeof(getcustomasset) ~= "function" then getcustomasset = function() return nil end end
-local function splice(s, old, new)
-local a, b = s:find(old, 1, true)
-if not a then return s, false end
-return s:sub(1, a - 1) .. new .. s:sub(b + 1), true
+-- OMEGA Tester: ищем зеркало Nile.lua без VPN
+local links = {
+    { "raw.githubusercontent", "https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua" },
+    { "cdn.jsdelivr.net", "https://cdn.jsdelivr.net/gh/sixjdnesmsjnajsn-cmd/Nile@main/Nile.lua" },
+    { "gh-proxy.com", "https://gh-proxy.com/https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua" },
+    { "ghproxy.net", "https://ghproxy.net/https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua" },
+    { "ghfast.top", "https://ghfast.top/https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua" },
+}
+print("=== OMEGA Tester: проверяем зеркала Nile.lua ===")
+local good
+for _, m in ipairs(links) do
+    local ok, res = pcall(function()
+        return game:HttpGet(m[2])
+    end)
+    if ok and type(res) == "string" and #res > 10000 then
+        print("[✅ РАБОТАЕТ] " .. m[1] .. " | размер: " .. #res)
+        if not good then good = m[2] end
+    else
+        local why = ok and ("пустой/короткий ответ (" .. #tostring(res or "") .. ")") or tostring(res)
+        print("[❌ нет] " .. m[1] .. " | " .. why)
+    end
 end
-local function dl(url, min)
-local body = nil
-local ok = pcall(function() body = game:HttpGet(url) end)
-if not (ok and type(body) == "string" and #body > (min or 1000)) then
-local mirror = url:gsub("^https://raw%.githubusercontent%.com/([^/]+)/([^/]+)/refs/heads/([^/]+)/(.+)$",
-"https://cdn.jsdelivr.net/gh/%1/%2@%3/%4")
-if mirror ~= url then
-ok = pcall(function() body = game:HttpGet(mirror) end)
-end
-end
-assert(ok and type(body) == "string" and #body > (min or 1000),
-"[Omega Hub] Не скачался (и через зеркало тоже): " .. url)
-return body
-end
-local src = dl("https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua", 100000)
-local lib = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua", 100000)
-local tm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua", 1000)
-local sm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua", 1000)
-local ico = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua", 10000)
-ico = ico:gsub("lucide%-icons", "omega-lucide-icons")
-src = src:gsub('Title = "Nil\'e"', 'Title = "OMEGA Hub"')
-local function rep(s, old, new)
-repeat
-local done
-s, done = splice(s, old, new)
-until not done
-return s
-end
-src = rep(src, '"layout-dashboard"', '"house"')
-src = rep(src, '"shield-cog-corner"', '"shield"')
-src = rep(src, '"locate-fixed"', '"swords"')
-src = rep(src, '"clapperboard"', '"mouse-pointer"')
-src = rep(src, '"rotate-3d"', '"radiation"')
-src = rep(src, '"bubbles"', '"eye"')
-src = rep(src, '"server"', '"settings-2"')
-local old_icons = "local FetchIcons, Icons = pcall(function()" ..
-"\n    return (loadstring(" ..
-"\n        game:HttpGet(\"https://raw.githubusercontent.com/" ..
-"ludicious-claw/sssss/refs/heads/main/Icons.Lua\")" ..
-"\n    ) :: () -> IconModule)()" ..
-"\nend)"
-local new_icons = "local FetchIcons, Icons = pcall(function()" ..
-"\n    return (loadstring([=====[" ..
-"\n" .. ico ..
-"\n]=====]) :: any)()" ..
-"\nend)"
-lib, ok1 = splice(lib, old_icons, new_icons)
-if not ok1 then warn("[Omega Hub] якорь иконок не найден — грузим Icons напрямую") end
-src, _ = splice(src, "setfpscap(999)", "-- setfpscap: защищено лоадером\npcall(setfpscap, 999)")
-local m1 = 'if workspace:FindFirstChild("VoidPlatform") then'
-local m2 = "local function fn16()"
-local i0, i1 = src:find(m1, 1, true), nil
-if i0 then
-i1 = src:find(m2, i0, true)
-end
-if i0 and i1 then
-local block = src:sub(i0, i1 - 1):match("^(.-)%s*$")
-src = src:sub(1, i0 - 1) .. "pcall(function()\n" .. block .. "\nend)\n\n" .. src:sub(i1)
+if good then
+    print("=== ГОТОВЫЙ ЗАПУСК через рабочее зеркало ===")
+    print('loadstring(game:HttpGet("' .. good .. '"))()')
 else
-warn("[Omega Hub] якорь блока карты не найден — пропускаю патч")
-end
-local OMEGA_RT = [===[
-LTRB:AddToggle("BlobmanLoopTargetToggle", {
-Text = "Loop Target",
-Default = false,
-Callback = function(arg)
-BlobmanLoopTargetEnabled = arg
-if not arg then
-local t0 = GetFirstTarget()
-local _, tp = t0 and t0.Character and GetHRH(t0.Character)
-local b = tp and tp:FindFirstChild("OMEGALock")
-if b then b:Destroy() end
-return
-end
-local GF = game:GetService("ReplicatedStorage"):WaitForChild("Grab", 5)
-local SNO = GF and GF:WaitForChild("SetNetworkOwner", 2)
-local DGL = GF and GF:WaitForChild("DestroyGrabLine", 2)
-local function isown(p)
-if not (p and p.Parent) then return false end
-local h = p.Parent:FindFirstChild("Head")
-local a = p:FindFirstChild("PartOwner") or h and h:FindFirstChild("PartOwner")
-return (a and a.Value == LocalPlayer.Name)
-or ((p.AssemblyRootPart or p).ReceiveAge == 0)
-end
-local function own(p)
-local _, rp, hm = GetHRH(char)
-local n = tick()
-while p.Parent and not isown(p) and tick() - n < 1.2
-and rp and hm and hm.Health > 0 do
-local c = (rp.CFrame - rp.Position) + p.Position
-if SNO then pcall(function() SNO:FireServer(p, c) end) end
-task.wait(0.05)
-end
-return isown(p)
-end
-task.spawn(function()
-while BlobmanLoopTargetEnabled and task.wait(0.1) do
-local _, rp, hm = GetHRH(char)
-if not (hm and hm.Health > 0) then continue end
-local sp = hm.SeatPart
-if not (sp and sp.Parent and sp.Parent:FindFirstChild("HumanoidCreature")) then
-local blob = toysFolder:FindFirstChild("CreatureBlobman")
-local seat = blob and blob:FindFirstChild("VehicleSeat")
-if blob and not seat then DestroyT(blob) blob = nil end
-if not blob and rp then
-blob = NewToy("CreatureBlobman", rp.CFrame * CFrame.new(0, 15, 20))
-seat = blob and blob:WaitForChild("VehicleSeat", 1)
-if blob and not seat then DestroyT(blob) blob = nil end
-end
-if seat and hm then pcall(function() seat:Sit(hm) end) end
-continue
-end
-local t = GetFirstTarget()
-local _, trp, thm = t and t.Character and GetHRH(t.Character)
-if not (trp and thm and thm.Health > 0 or own(trp)) then continue end
-if BlobmanLoopMethod == "Kill" then
-thm.BreakJointsOnDeath = false
-thm:ChangeState(Enum.HumanoidStateType.Dead)
-elseif BlobmanLoopMethod == "Lock" then
-if not trp:FindFirstChild("OMEGALock") then
-local bp = Instance.new("BodyPosition", trp)
-bp.Name, bp.Position, bp.D = "OMEGALock", trp.Position, 100
-bp.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-end
-elseif BlobmanLoopMethod == "Kick [Instant]" or BlobmanLoopMethod == "Kick [Loop]" then
-local bp = trp:FindFirstChild("OMEGALock")
-if bp then bp:Destroy() end
-pcall(function() trp.CFrame = CFrame.new(0, 9e9, 0) end)
-pcall(function() trp.AssemblyLinearVelocity = Vector3.new(0, 9e9, 0) end)
-task.delay(0.35, function() if DGL then pcall(function() DGL:FireServer(trp) end) end end)
-end
-end
-end)
-end,
-})
-]===]
-
-local ra = src:find('LTRB:AddToggle("BlobmanLoopTargetToggle"', 1, true)
-local rz = src:find('CTR:AddToggle("RagdollTargetToggle"', 1, true)
-if ra and rz and rz > ra then
-src = src:sub(1, ra - 1) .. OMEGA_RT .. "\n\n" .. src:sub(rz)
-else
-warn("[Omega Hub] якоря Loop Target не найдены — пропускаю патч")
-end
-src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
-"pcall(function() SaveManager:LoadAutoloadConfig() end)")
-src, _ = splice(src, "EnableSidebarResize = true,",
-"EnableSidebarResize = true,\nEnableCompacting = true,\nSidebarCompacted = true,\nMinSidebarWidth = 200,\nSidebarCompactWidth = 56,")
-src, _ = splice(src, "Window:SetSidebarWidth(125)",
-"Window:SetSidebarWidth(125)\nWindow:SetCompact(true)")
-_load = function(code, tag)
-local ok, res = pcall(loadstring(code))
-if ok and res then
-_G["NILE_" .. tag] = res
-else
-warn("[Omega Hub] модуль " .. tag .. " не загрузился: " .. tostring(res))
-end
-end
-_load(lib, "LIB"); _load(tm, "TM"); _load(sm, "SM")
-assert(_G.NILE_LIB, "[Omega Hub] библиотека UI не загрузилась — запуск невозможен")
-if not _G.NILE_TM then _G.NILE_TM = setmetatable({}, { __index = function() return function() end end }) end
-if not _G.NILE_SM then _G.NILE_SM = setmetatable({}, { __index = function() return function() end end }) end
-src, _ = splice(src, 'Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua"))()', "Library = _G.NILE_LIB")
-src, _ = splice(src, 'ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua"))()', "ThemeManager = _G.NILE_TM")
-src, _ = splice(src, 'SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua"))()', "SaveManager = _G.NILE_SM")
-local ok, err = pcall(loadstring(src))
-if not ok then
-error("[Omega Hub] ошибка запуска: " .. tostring(err))
+    print("=== НИ ОДНО ЗЕРКАЛО НЕ ДОСТУПНО: положи файл в Discord и загрузи оттуда ===")
 end
