@@ -1,28 +1,59 @@
--- OMEGA Tester: ищем зеркало Nile.lua без VPN
+-- OMEGA Tester v2: зеркала Nile.lua + вывод НА ЭКРАН
 local links = {
-    { "raw.githubusercontent", "https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua" },
-    { "cdn.jsdelivr.net", "https://cdn.jsdelivr.net/gh/sixjdnesmsjnajsn-cmd/Nile@main/Nile.lua" },
-    { "gh-proxy.com", "https://gh-proxy.com/https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua" },
-    { "ghproxy.net", "https://ghproxy.net/https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua" },
-    { "ghfast.top", "https://ghfast.top/https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua" },
+    {"raw.githubusercontent", "https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua"},
+    {"cdn.jsdelivr.net", "https://cdn.jsdelivr.net/gh/sixjdnesmsjnajsn-cmd/Nile@main/Nile.lua"},
+    {"gh-proxy.com", "https://gh-proxy.com/https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua"},
+    {"ghproxy.net", "https://ghproxy.net/https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua"},
+    {"ghfast.top", "https://ghfast.top/https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua"},
 }
-print("=== OMEGA Tester: проверяем зеркала Nile.lua ===")
-local good
-for _, m in ipairs(links) do
-    local ok, res = pcall(function()
-        return game:HttpGet(m[2])
-    end)
-    if ok and type(res) == "string" and #res > 10000 then
-        print("[✅ РАБОТАЕТ] " .. m[1] .. " | размер: " .. #res)
-        if not good then good = m[2] end
-    else
-        local why = ok and ("пустой/короткий ответ (" .. #tostring(res or "") .. ")") or tostring(res)
-        print("[❌ нет] " .. m[1] .. " | " .. why)
+local gui = Instance.new("ScreenGui")
+if not pcall(function() gui.Parent = game:GetService("CoreGui") end) then
+    gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+end
+local bg = Instance.new("Frame", gui)
+bg.Size = UDim2.new(0, 480, 0, 260)
+bg.Position = UDim2.new(0.5, -240, 0, 40)
+bg.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+bg.BorderSizePixel = 0
+local close = Instance.new("TextButton", bg)
+close.Size = UDim2.new(0, 28, 0, 28)
+close.Position = UDim2.new(1, -32, 0, 4)
+close.Text = "X"
+close.BackgroundColor3 = Color3.fromRGB(120, 30, 30)
+close.TextColor3 = Color3.new(1, 1, 1)
+close.MouseButton1Click:Connect(function() gui:Destroy() end)
+local log = Instance.new("TextLabel", bg)
+log.Size = UDim2.new(1, -20, 1, -20)
+log.Position = UDim2.new(0, 10, 0, 10)
+log.BackgroundTransparency = 1
+log.TextColor3 = Color3.new(1, 1, 1)
+log.TextXAlignment = Enum.TextXAlignment.Left
+log.TextYAlignment = Enum.TextYAlignment.Top
+log.TextWrapped = true
+log.Font = Enum.Font.Code
+log.TextSize = 15
+local line = "OMEGA Tester v2: проверяю зеркала..."
+local function put(s)
+    line = line .. "\n" .. s
+    log.Text = line
+    print(s)
+end
+task.spawn(function()
+    local good
+    for _, m in ipairs(links) do
+        local ok2, res = pcall(function() return game:HttpGet(m[2]) end)
+        if ok2 and type(res) == "string" and #res > 10000 then
+            put("[OK] " .. m[1] .. " | размер " .. #res)
+            if not good then good = m[2] end
+        else
+            put("[НЕТ] " .. m[1] .. " | " .. (ok2 and "короткий ответ" or tostring(res)))
+        end
     end
-end
-if good then
-    print("=== ГОТОВЫЙ ЗАПУСК через рабочее зеркало ===")
-    print('loadstring(game:HttpGet("' .. good .. '"))()')
-else
-    print("=== НИ ОДНО ЗЕРКАЛО НЕ ДОСТУПНО: положи файл в Discord и загрузи оттуда ===")
-end
+    if good then
+        local launch = 'loadstring(game:HttpGet("' .. good .. '"))()'
+        put("ЗАПУСК: " .. launch)
+        if setclipboard then pcall(setclipboard, launch) end
+    else
+        put("Ни одно зеркало не работает. План Б: файл через Discord CDN.")
+    end
+end)
