@@ -106,6 +106,33 @@ end,
 })
 end)
 end
+local seen = {}
+local function collect()
+for _, d in ipairs(gui:GetDescendants()) do
+if d:IsA("TextLabel") or d:IsA("TextButton") then
+local t = d.Text
+if t and #t >= 2 and #t <= 40 and not t:match("^[%d%p%s]+$") then seen[t] = true end
+end
+end
+end
+pcall(collect)
+pcall(function()
+gui.DescendantAdded:Connect(function(d)
+pcall(function()
+if d:IsA("TextLabel") or d:IsA("TextButton") then
+local t = d.Text
+if t and #t >= 2 and #t <= 40 and not t:match("^[%d%p%s]+$") then seen[t] = true end
+end
+end)
+end)
+end)
+task.delay(5, function()
+local list = {}
+for t in pairs(seen) do table.insert(list, t) end
+table.sort(list)
+pcall(setclipboard, table.concat(list, "\n"))
+warn("[Omega Hub] text list copied to clipboard — paste it in chat (" .. #list .. " items)")
+end)
 local sb = nil
 for _, d in ipairs(gui:GetDescendants()) do
 if d:IsA("TextBox") and (d.Name:lower():find("search") or (d.PlaceholderText or ""):lower():find("search")) then sb = d break end
