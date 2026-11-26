@@ -1,0 +1,369 @@
+warn("[Omega Hub] v3.0 — new version loaded " .. os.date("%H:%M:%S"))
+pcall(setfpscap, 999)
+if typeof(getgenv) ~= "function" then getgenv = function() return _G end end
+if typeof(writefile) ~= "function" then writefile = function() return false end end
+if typeof(readfile) ~= "function" then readfile = function() return nil end end
+if typeof(delfile) ~= "function" then delfile = function() end end
+if typeof(isfile) ~= "function" then isfile = function() return false end end
+if typeof(isfolder) ~= "function" then isfolder = function() return false end end
+if typeof(makefolder) ~= "function" then makefolder = function() end end
+if typeof(listfiles) ~= "function" then listfiles = function() return {} end end
+if typeof(setclipboard) ~= "function" then setclipboard = function() return false end end
+if typeof(getcustomasset) ~= "function" then getcustomasset = function() return nil end end
+local function say(en, ru)
+if _G.NEIL_LANG_RU then warn("[Omega Hub] " .. ru) else warn("[Omega Hub] " .. en) end
+end
+local function splice(s, old, new)
+local a, b = s:find(old, 1, true)
+if not a then return s, false end
+return s:sub(1, a - 1) .. new .. s:sub(b + 1), true
+end
+local function dl(url, min)
+local body = nil
+local ok = pcall(function() body = game:HttpGet(url) end)
+if not (ok and type(body) == "string" and #body > (min or 1000)) then
+local mirror = url:gsub("^https://raw%.githubusercontent%.com/([^/]+)/([^/]+)/refs/heads/([^/]+)/(.+)$",
+"https://cdn.jsdelivr.net/gh/%1/%2@%3/%4")
+if mirror ~= url then
+ok = pcall(function() body = game:HttpGet(mirror) end)
+end
+end
+assert(ok and type(body) == "string" and #body > (min or 1000),
+"[Omega Hub] Download failed (mirror too): " .. url)
+return body
+end
+local src = dl("https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua", 100000)
+local lib = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua", 100000)
+local tm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua", 1000)
+local sm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua", 1000)
+local ico = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua", 10000)
+ico = ico:gsub("lucide%-icons", "omega-lucide-icons")
+lib = lib:gsub('"Obsidian/', '"OmegaHub/')
+tm = tm:gsub('"Obsidian/', '"OmegaHub/')
+sm = sm:gsub('"Obsidian/', '"OmegaHub/')
+src = src:gsub('Title = "Nil\'e"', 'Title = "NEIL NO KEY V2"')
+src = splice(src, "CornerRadius = 8,", "Icon = \"rocket\",\nCornerRadius = 20,")
+local old_icons = "local FetchIcons, Icons = pcall(function()" ..
+"\n    return (loadstring(" ..
+"\n        game:HttpGet(\"https://raw.githubusercontent.com/" ..
+"ludicious-claw/sssss/refs/heads/main/Icons.Lua\")" ..
+"\n    ) :: () -> IconModule)()" ..
+"\nend)"
+local new_icons = "local FetchIcons, Icons = pcall(function()" ..
+"\n    return (loadstring([=====[" ..
+"\n" .. ico ..
+"\n]=====]) :: any)()" ..
+"\nend)"
+local ok1
+lib, ok1 = splice(lib, old_icons, new_icons)
+if not ok1 then warn("[Omega Hub] icons anchor not found — loading Icons directly") end
+src = splice(src, "setfpscap(999)", "pcall(setfpscap, 999)")
+local m1 = 'if workspace:FindFirstChild("VoidPlatform") then'
+local m2 = "local function fn16()"
+local i0, i1 = src:find(m1, 1, true)
+if i0 then
+i1 = src:find(m2, i0, true)
+end
+if i0 and i1 then
+local block = src:sub(i0, i1 - 1):match("^(.-)%s*$")
+src = src:sub(1, i0 - 1) .. "pcall(function()\n" .. block .. "\nend)\n\n" .. src:sub(i1)
+else
+warn("[Omega Hub] map block anchor not found — skipping patch")
+end
+src = splice(src, "SaveManager:LoadAutoloadConfig()",
+"pcall(function() SaveManager:LoadAutoloadConfig() end)")
+src = splice(src, "EnableSidebarResize = true,",
+"EnableSidebarResize = true,\nEnableCompacting = true,\nSidebarCompacted = false,\nMinSidebarWidth = 160,\nSidebarCompactWidth = 56,")
+src = splice(src, "Window:SetSidebarWidth(125)", [====[
+Window:SetSidebarWidth(160)
+task.delay(1.5, function()
+pcall(function()
+local gui = (typeof(Library) == "table" and Library.ScreenGui) or nil
+if not gui then return end
+for _, d in ipairs(gui:GetDescendants()) do
+if d:IsA("TextLabel") and d.Text == "NEIL NO KEY V2" then
+pcall(function()
+d.TextSize = 13
+d.TextScaled = false
+d.TextTruncate = Enum.TextTruncate.AtEnd
+end)
+end
+end
+local D = {
+["Main"]="Главное", ["Defense"]="Защита", ["Target"]="Цель", ["Poses"]="Позы",
+["Auras"]="Ауры", ["Toys"]="Игрушки", ["Visual"]="Визуал", ["Visuals"]="Визуал",
+["Keybinds"]="Бинды", ["Binds"]="Бинды", ["Server"]="Сервер", ["UI Settings"]="Настройки UI",
+["Main Defense"]="Основная защита", ["Misc"]="Разное", ["Functions"]="Функции",
+["Methods"]="Методы", ["Toggles"]="Переключатели", ["Settings"]="Настройки",
+["Language"]="Язык", ["Russian Console"]="Русская консоль",
+["Local Player"]="Локальный игрок", ["LocalPlayer and Grabline Settings"]="Игрок и линия граба",
+["Aura Settings"]="Настройки ауры", ["Line Settings"]="Настройки линий",
+["Server Info"]="Инфо сервера", ["TP Places"]="Места ТП", ["Teleports"]="Телепорты",
+["Map"]="Карта", ["Map Objects"]="Объекты карты", ["Plots"]="Участки",
+["Plot 1"]="Участок 1", ["Plot 2"]="Участок 2", ["Plot 3"]="Участок 3", ["Plot 4"]="Участок 4", ["Plot 5"]="Участок 5",
+["Plot1"]="Участок 1", ["Plot2"]="Участок 2", ["Plot3"]="Участок 3", ["Plot4"]="Участок 4", ["Plot5"]="Участок 5",
+["Owned Plot"]="Свой участок", ["House"]="Дом", ["Barn"]="Сарай", ["Island"]="Остров", ["Pyramid"]="Пирамида",
+["Anti Fling"]="Анти флинг", ["Anti Void"]="Анти войд", ["Anti Grab"]="Анти граб",
+["Anti Grab Mode"]="Режим анти граба", ["Anti Banana"]="Анти банан", ["Anti Blob"]="Анти блоб",
+["Anti Burn"]="Анти поджог", ["Anti Detect"]="Анти детект", ["Anti Explode"]="Анти взрыв",
+["Anti Kick"]="Анти кик", ["Anti Kick Item"]="Анти кик предмета", ["Anti Lag"]="Анти лаг",
+["Anti Network"]="Анти сеть", ["Anti Network Delay"]="Задержка анти сети", ["Anti Network Item"]="Анти сеть предмета",
+["Anti Snowball"]="Анти снежок", ["Anti Sticky (WD)"]="Анти липучка (WD)",
+["Anti Poison & Paint & Sticky"]="Анти яд, краска и липучка",
+["Auto Anti Lag"]="Авто анти лаг", ["Auto Attack"]="Авто атака", ["Auto Attacker"]="Авто атакующий",
+["Auto Explode Bombs"]="Авто взрыв бомб", ["Auto Leave"]="Авто выход",
+["Auto Line Lag"]="Авто лаг линий", ["Auto Play"]="Авто игра", ["Auto Repair"]="Авто ремонт",
+["Auto Reset"]="Авто сброс", ["Auto Sit"]="Авто сид", ["Auto Spin Slots"]="Авто слоты",
+["Auto Whitelist Friends"]="Авто вайтлист друзей", ["Auto Leave Sensitivity"]="Чувствительность выхода",
+["Fling"]="Флинг", ["Fling Mode Power"]="Сила флинга", ["Throw Power"]="Сила броска",
+["Heaven Mode Power"]="Сила режима рая", ["Send To The Heaven"]="Отправить в рай",
+["Kill"]="Убить", ["Kick"]="Кик", ["Kick All"]="Кикнуть всех", ["Kick Grab"]="Кик-граб",
+["Kick Notify"]="Уведомление о кике", ["Kick [Faster]"]="Кик [Быстрее]",
+["Kick [Instant]"]="Кик [Мгновенно]", ["Kick [Loop]"]="Кик [Луп]", ["Kick [Slower]"]="Кик [Медленнее]",
+["Total Kicks"]="Всего киков", ["Kill Grab"]="Убить в грабе",
+["CS:GO HeadShot"]="CS:GO хедшот", ["CS:GO Kill"]="CS:GO килл",
+["Grab"]="Схватить", ["Grab Aura"]="Аура граба", ["Grab Aura Mode"]="Режим ауры граба",
+["Grab Mods"]="Граб-моды", ["Noclip Grab"]="Ноклип граб", ["Ragdoll Grab"]="Граб-регдолл",
+["Anchor Grab"]="Якорь граба", ["Anchor Toy"]="Якорь игрушки", ["Anchor"]="Якорь",
+["Remove Anchor"]="Убрать якорь", ["Remove Anchor For All Toys"]="Убрать якорь у всех игрушек",
+["Massless Grab"]="Граб без массы", ["Farther Reach"]="Дальнее схватывание",
+["Hold"]="Держать", ["Press"]="Нажать", ["Toggle"]="Переключить", ["Use"]="Использовать", ["Use Clone"]="Использовать клон",
+["Toggle Anti Grab"]="Вкл анти граб", ["Toggle Anti Lag"]="Вкл анти лаг",
+["Toggle Anti Network"]="Вкл анти сеть", ["Toggle Gucci"]="Вкл гуччи",
+["Toggle JumpPower"]="Вкл сила прыжка", ["Toggle Line Lag"]="Вкл лаг линий",
+["Toggle Loop Ragdoll"]="Вкл луп регдолла", ["Toggle Loop TP"]="Вкл луп ТП",
+["Toggle Packet Lag"]="Вкл лаг пакетов", ["Toggle UI"]="Показать UI", ["Toggle WalkSpeed"]="Вкл скорость",
+["Gucci"]="Гуччи", ["Break Gucci"]="Сломать гуччи", ["Gucci Method"]="Метод гуччи", ["Gucci [Anti Grab]"]="Гуччи [Анти граб]",
+["Break"]="Ломать", ["Break Area"]="Зона поломки", ["Break Barrier"]="Сломать барьер",
+["Break Mode"]="Режим поломки", ["Break Object"]="Сломать объект",
+["Break Part"]="Сломать часть", ["Break PCLD"]="Сломать PCLD",
+["Barrier Status"]="Статус барьера", ["Working 🔴"]="Работает 🔴",
+["Banana All"]="Банан всех", ["Banana Aura"]="Аура банана", ["Banana Ragdoll"]="Банан-регдолл",
+["Blobman Aura"]="Аура блобмана", ["Blobman Aura Mode"]="Режим ауры блобмана",
+["Blobman Auras"]="Ауры блобмана", ["Blobman ESP"]="ЕСП блобмана",
+["Blobman ESP Color"]="Цвет ЕСП блобмана", ["Blobman Loop Method"]="Луп блобмана",
+["Players Aura"]="Аура игроков", ["Players ESP"]="ЕСП игроков", ["ESP Players"]="ЕСП игроков", ["ESP Toys"]="ЕСП игрушек",
+["Toys Aura"]="Аура игрушек", ["Toys Aura Mode"]="Режим ауры игрушек",
+["Extinguish Aura"]="Аура тушения", ["Aura Radius"]="Радиус ауры",
+["Sticky Items ESP"]="ЕСП липких предметов", ["Sticky Items Color"]="Цвет липких предметов",
+["House Blobman ESP Color"]="Цвет ЕСП блобмана дома", ["House Sticky Items Color"]="Цвет лип. предметов дома",
+["Your Blobman ESP Color"]="Цвет вашего ЕСП блобмана", ["Your Sticky Items Color"]="Цвет ваших липких предметов",
+["Whitelisted Color"]="Цвет вайтлиста", ["Target Color"]="Цвет цели",
+["Selected Parts Color"]="Цвет выбранных частей", ["Player Color"]="Цвет игрока",
+["BlackHole"]="Блэкхол", ["Blackhole Highlight"]="Подсветка блэкхола",
+["Blackhole Image"]="Картинка блэкхола", ["Blackhole Image Color"]="Цвет картинки блэкхола",
+["Blackhole Name"]="Имя блэкхола", ["Blackhole Trace"]="Трейс блэкхола",
+["Hole Color And Transparency"]="Цвет и прозрачность дыры",
+["Void"]="Войд", ["Void Platform"]="Платформа войда",
+["Ragdoll"]="Регдолл", ["Ragdoll Target"]="Цель-регдолл",
+["Ragdoll Kill [Pencil]"]="Регдолл-килл [Карандаш]", ["No Ragdoll"]="Без регдолла",
+["Disable Ragdoll Blur"]="Откл размытие регдолла", ["Struggle"]="Сопротивление",
+["Delete Limbs"]="Удалить конечности", ["Delete Libms"]="Удалить конечности",
+["Delete Train"]="Удалить поезд", ["Which Limbs Need To Delete"]="Какие конечности удалять",
+["Head Drop"]="Сбросить голову", ["Floating Head"]="Парящая голова",
+["Head"]="Голова", ["Torso"]="Торс", ["Arms"]="Руки", ["Arm"]="Рука", ["Legs"]="Ноги",
+["Left Arm"]="Левая рука", ["Right Arm"]="Правая рука", ["Left Leg"]="Левая нога", ["Right Leg"]="Правая нога",
+["Head Offset"]="Смещение головы", ["Head Rot"]="Поворот головы",
+["Left Arm Offset"]="Смещение левой руки", ["Left Arm Rotation"]="Поворот левой руки",
+["Right Arm Offset"]="Смещение правой руки", ["Right Arm Rotation"]="Поворот правой руки",
+["Left Leg Offset"]="Смещение левой ноги", ["Left Leg Rotation"]="Поворот левой ноги",
+["Right Leg Offset"]="Смещение правой ноги", ["Right Leg Rotation"]="Поворот правой ноги",
+["Torso Offset"]="Смещение торса", ["Torso Rot"]="Поворот торса",
+["Rotation"]="Поворот", ["Transparency"]="Прозрачность", ["Material"]="Материал",
+["Body Parts"]="Части тела", ["First Person Body Parts"]="Тело от 1-го лица",
+["Insane Arms"]="Безумные руки", ["Arm Detach"]="Отсоединить руку", ["Arm Turbine"]="Турбина рук",
+["Floor Claw"]="Коготь по полу", ["Floor Faint"]="Обморок на полу", ["Faint"]="Обморок",
+["Scared"]="Испуг", ["Dab"]="Дэб", ["Dance"]="Танец", ["Dance 2"]="Танец 2",
+["Wave"]="Волна", ["Levitate"]="Левитация", ["Crouch"]="Присесть", ["Bow Down"]="Поклон",
+["Spin Dance"]="Вращ. танец", ["Spin Dance 2"]="Вращ. танец 2",
+["Moon Dance"]="Лунный танец", ["Moving Dance"]="Движ. танец",
+["Jumping Jacks"]="Прыжки", ["Hero Jump"]="Герой-прыжок", ["Barrel Roll"]="Бочка",
+["Weird Move"]="Странное движение", ["Zombie"]="Зомби",
+["Apply Pose"]="Применить позу", ["Apply Animation"]="Применить анимацию",
+["Select Animation"]="Выбрать анимацию", ["Animation Speed"]="Скорость анимации", ["Animations"]="Анимации",
+["Fly"]="Полёт", ["Fly Speed"]="Скорость полёта", ["Noclip"]="Ноклип", ["Infinite Jump"]="Бескон. прыжок",
+["Water Walk"]="Ходьба по воде", ["WalkSpeed"]="Скорость", ["JumpPower"]="Сила прыжка",
+["Unlock Third Person"]="Открыть 3-е лицо", ["Loop TP"]="Луп ТП", ["TP To Target"]="ТП к цели",
+["Last Position"]="Последняя позиция", ["Custom Spawn Point"]="Своя точка спавна",
+["Select Spawn Point"]="Выбрать точку спавна", ["Spawn"]="Спавн", ["Rejoin"]="Перезайти",
+["Line Lag"]="Лаг линий", ["Detect Line Lag"]="Детект лага линий", ["Detect Packets"]="Детект пакетов",
+["Invisible Line"]="Невидимая линия", ["Realistic Line"]="Реалистичная линия",
+["Line Sounds"]="Звуки линий", ["Line Texture"]="Текстура линии", ["Lines"]="Линии",
+["Crazy Line"]="Безумная линия", ["Chain"]="Цепь", ["Dots"]="Точки", ["Lock"]="Лок",
+["Lags"]="Лаги", ["Packets"]="Пакеты", ["Packet Amount"]="Кол-во пакетов",
+["Packet Args"]="Аргументы пакета", ["Packet Size"]="Размер пакета",
+["Send Packet"]="Отправить пакет", ["Send Packets"]="Отправить пакеты", ["Send Interval"]="Интервал отправки",
+["Loop Target"]="Луп цели", ["Target List"]="Список целей", ["Clear Target List"]="Очистить цели",
+["Add To Target List"]="Добавить в цели", ["Select Targets"]="Выбрать цели",
+["Select Player"]="Выбрать игрока", ["Select Players"]="Выбрать игроков",
+["Select Plots"]="Выбрать участки", ["Select Object"]="Выбрать объект",
+["Targets"]="Цели", ["Targets Height"]="Высота целей", ["Target Toys"]="Целевые игрушки",
+["View Target"]="Смотреть цель", ["Trace"]="Трейс", ["To Mouse"]="К мыши",
+["Whitelist"]="Вайтлист", ["Clear Whitelist"]="Очистить вайтлист", ["Add Whitelisted Player"]="Добавить в вайтлист",
+["Last Grabber"]="Последний граббер",
+["Steal All Holdables"]="Украсть все предметы", ["Steal Holdables"]="Украсть предметы",
+["Steal Anti Kick"]="Украсть анти кик", ["Steal Mode"]="Режим кражи",
+["Clear Inventory"]="Очистить инвентарь", ["PCLD View"]="Просмотр PCLD",
+["Explode Item"]="Взорвать предмет", ["Loop Explode"]="Луп взрыв", ["Explosions"]="Взрывы",
+["Fire"]="Огонь", ["Flood"]="Потоп", ["Bonk"]="Бонк", ["Boombox"]="Бумбокс",
+["Loop All"]="Луп всех", ["Loop Method"]="Метод лупа", ["Loop Snowball"]="Луп снежков",
+["Keep Shurikens"]="Сохранять сюрикены", ["Shurikens Count"]="Кол-во сюрикенов",
+["Fix All"]="Починить всё", ["Hide Map Props"]="Скрыть пропы карты", ["No Texture"]="Без текстур",
+["Enable Shaders"]="Шейдеры", ["Ambience"]="Окружение",
+["Dirt Color"]="Цвет земли", ["Grass Color"]="Цвет травы", ["Rock Color"]="Цвет камня",
+["Sand Color"]="Цвет песка", ["Snow Color"]="Цвет снега",
+["WasteGrass Color"]="Цвет сухой травы", ["LushGrass Color"]="Цвет пышной травы",
+["Reset Colors"]="Сбросить цвета", ["FOV"]="Обзор", ["Volume"]="Громкость",
+["No Sound"]="Без звука", ["Game Sounds"]="Звуки игры", ["Sound Link"]="Ссылка звука",
+["Sound Spam"]="Спам звуком", ["Sound Spam Interval"]="Интервал спама звуком",
+["Notify Sound"]="Звук уведомления", ["Notify Time"]="Время уведомления",
+["Screams"]="Крики", ["Sounds"]="Звуки", ["Find Cheaters"]="Найти читеров",
+["Players"]="Игроки", ["Player"]="Игрок", ["Session Time"]="Время сессии", ["Time Left"]="Осталось времени",
+["Mobile Buttons"]="Мобильные кнопки", ["Lock Mouse"]="Лок мыши", ["What Should Do"]="Что делать",
+["Infinite Extend [PC Only]"]="Бескон. растяжение [PC]", ["Use Power [PC Only]"]="Использовать силу [PC]",
+["Stick All"]="Приклеить всех", ["Stick All [Lag]"]="Приклеить всех [Лаг]", ["Sync All"]="Синхронизировать всех",
+["All"]="Все", ["Always"]="Всегда", ["None"]="Ничего",
+["Launch Rocket"]="Запустить ракету", ["Tractor Escape"]="Побег трактора",
+["Tractor [Invisible]"]="Трактор [Невид.]", ["Train [Invisible]"]="Поезд [Невид.]",
+["Spawn And Sit Blob"]="Спавн и сид блоба", ["Non Blobman"]="Не блобман",
+["Image"]="Картинка", ["Enable Custom Image"]="Своё изображение",
+["Float Sit"]="Парящий сид", ["HeadSit"]="Сид на голове", ["Gravity"]="Гравитация", ["Interval"]="Интервал",
+["SelectionBox"]="Выделение", ["Steam notification"]="Steam уведомление",
+["Config list"]="Список конфигов", ["Config name"]="Имя конфига", ["Configuration"]="Конфигурация",
+["Create Config"]="Создать конфиг", ["Create config"]="Создать конфиг", ["Delete config"]="Удалить конфиг",
+["Load config"]="Загрузить конфиг", ["Overwrite config"]="Перезаписать конфиг",
+["Set as autoload"]="Сделать автозагрузкой", ["Reset autoload"]="Сбросить автозагрузку",
+["Current autoload config"]="Текущий автоконфиг",
+["Theme list"]="Список тем", ["Create theme"]="Создать тему", ["Delete theme"]="Удалить тему",
+["Load theme"]="Загрузить тему", ["Overwrite theme"]="Перезаписать тему",
+["Custom themes"]="Свои темы", ["Custom theme name"]="Имя своей темы", ["Themes"]="Темы",
+["Accent color"]="Цвет акцента", ["Background color"]="Цвет фона", ["Main color"]="Основной цвет",
+["Font color"]="Цвет шрифта", ["Outline color"]="Цвет обводки", ["Font Face"]="Шрифт",
+["Corner Radius"]="Радиус углов", ["Background"]="Фон",
+["Copy Hex"]="Копировать HEX", ["Copy RGB"]="Копировать RGB", ["Copy Json"]="Копировать JSON",
+["Copy Link"]="Копировать ссылку", ["Copy color"]="Копировать цвет", ["Paste color"]="Вставить цвет",
+["File Name"]="Имя файла", ["Export"]="Экспорт", ["Import"]="Импорт", ["Json"]="JSON",
+["Discord Server"]="Discord сервер", ["Gamepass"]="Геймпасс",
+["Reset default"]="Сбросить по умолчанию", ["Set as default"]="Сделать по умолчанию",
+["Refresh list"]="Обновить список", ["Name"]="Имя", ["Label"]="Надпись", ["Button"]="Кнопка",
+["Delete"]="Удалить", ["Camera"]="Камера", ["Zoom"]="Зум",
+}
+local RD = {}
+for en, ru in pairs(D) do RD[ru] = en end
+local function tr(t, m)
+if m[t] then return m[t] end
+local base, rest = t:match("^(.-):%s*(.+)$")
+if not base then return nil end
+local ax = base:match("%s([XYZ])$")
+if ax then base = base:sub(1, -3) end
+local ru = m[base]
+if not ru then return nil end
+return ru .. (ax and (" " .. ax) or "") .. (rest and (": " .. rest) or "")
+end
+local function langPass(m)
+pcall(function()
+for _, d in ipairs(gui:GetDescendants()) do
+if d:IsA("TextLabel") or d:IsA("TextButton") then
+pcall(function()
+local n = tr(d.Text, m)
+if n then d.Text = n end
+end)
+end
+end
+end)
+end
+if typeof(Tabs) == "table" and (Tabs["UI Settings"] or Tabs.Settings) then
+pcall(function()
+local gb = (Tabs["UI Settings"] or Tabs.Settings):AddLeftGroupbox("Language", "globe")
+pcall(function()
+local f = (typeof(gb) == "table" and (gb.Frame or gb.Holder)) or nil
+if typeof(f) == "Instance" and f:IsA("GuiObject") then
+f.LayoutOrder = -1
+local p = f.Parent
+if p then
+for _, c in ipairs(p:GetChildren()) do
+if c:IsA("UIListLayout") then c.SortOrder = Enum.SortOrder.LayoutOrder end
+end
+end
+end
+end)
+gb:AddToggle("NEILLangToggle", {
+Text = "Russian Console",
+Default = false,
+Callback = function(v)
+_G.NEIL_LANG_RU = v
+task.delay(0.1, function() langPass(v and D or RD) end)
+if v then
+warn("[Omega Hub] Язык консоли: РУССКИЙ — интерфейс переведён")
+else
+warn("[Omega Hub] Console language: ENGLISH — interface restored")
+end
+end,
+})
+end)
+end
+pcall(function()
+gui.DescendantAdded:Connect(function(d)
+pcall(function()
+if _G.NEIL_LANG_RU and (d:IsA("TextLabel") or d:IsA("TextButton")) then
+task.delay(0.1, function() pcall(function()
+local n = tr(d.Text, D)
+if n then d.Text = n end
+end) end)
+end
+end)
+end)
+end)
+local sb = nil
+for _, d in ipairs(gui:GetDescendants()) do
+if d:IsA("TextBox") and (d.Name:lower():find("search") or (d.PlaceholderText or ""):lower():find("search")) then sb = d break end
+end
+if not sb then return end
+local btn = Instance.new("TextButton")
+btn.Name = "NEILSideToggle"
+btn.Size = UDim2.new(0, 24, 0, 24)
+btn.AnchorPoint = Vector2.new(1, 0.5)
+btn.Position = UDim2.new(1, -2, 0.5, 0)
+btn.BackgroundColor3 = Color3.fromRGB(30, 30, 34)
+btn.BackgroundTransparency = 0.15
+btn.Text = "<<"
+btn.TextColor3 = Color3.new(1, 1, 1)
+btn.Font = Enum.Font.Code
+btn.TextSize = 13
+btn.Parent = sb.Parent
+pcall(function() sb.Size = UDim2.new(1, -30, 1, 0) end)
+local wide = true
+btn.MouseButton1Click:Connect(function()
+wide = not wide
+if wide then
+if Window.SetCompact then pcall(Window.SetCompact, Window, false) end
+if Window.SetSidebarWidth then pcall(Window.SetSidebarWidth, Window, 160) end
+btn.Text = "<<"
+else
+if Window.SetCompact then pcall(Window.SetCompact, Window, true) end
+btn.Text = ">>"
+end
+end)
+end)
+end)
+]====])
+local _load = function(code, tag)
+local ok, res = pcall(loadstring(code))
+if ok and res then
+_G["NILE_" .. tag] = res
+else
+say("module " .. tag .. " failed to load: " .. tostring(res), "модуль " .. tag .. " не загрузился: " .. tostring(res))
+end
+end
+_load(lib, "LIB"); _load(tm, "TM"); _load(sm, "SM")
+assert(_G.NILE_LIB, "[Omega Hub] UI library failed to load — cannot start")
+if not _G.NILE_TM then _G.NILE_TM = setmetatable({}, { __index = function() return function() end end }) end
+if not _G.NILE_SM then _G.NILE_SM = setmetatable({}, { __index = function() return function() end end }) end
+src = splice(src, 'Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua"))()', "Library = _G.NILE_LIB")
+src = splice(src, 'ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua"))()', "ThemeManager = _G.NILE_TM")
+src = splice(src, 'SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua"))()', "SaveManager = _G.NILE_SM")
+src = "local Library, ThemeManager, SaveManager = _G.NILE_LIB, _G.NILE_TM, _G.NILE_SM\n" .. src
+local ok, err = pcall(loadstring(src))
+if not ok then
+error("[Omega Hub] start error: " .. tostring(err))
+end
