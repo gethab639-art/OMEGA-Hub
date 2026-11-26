@@ -35,6 +35,9 @@ local tm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/head
 local sm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua", 1000)
 local ico = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua", 10000)
 ico = ico:gsub("lucide%-icons", "omega-lucide-icons")
+lib = lib:gsub('"Obsidian/', '"OmegaHub/')
+tm = tm:gsub('"Obsidian/', '"OmegaHub/')
+sm = sm:gsub('"Obsidian/', '"OmegaHub/')
 src = src:gsub('Title = "Nil\'e"', 'Title = "NEIL NO KEY V2"')
 src, _ = splice(src, "CornerRadius = 8,", "Icon = \"rocket\",\nCornerRadius = 20,")
 local function rep(s, old, new)
@@ -65,7 +68,7 @@ local new_icons = "local FetchIcons, Icons = pcall(function()" ..
 local ok1
 lib, ok1 = splice(lib, old_icons, new_icons)
 if not ok1 then warn("[Omega Hub] якорь иконок не найден — грузим Icons напрямую") end
-src, _ = splice(src, "setfpscap(999)", "-- setfpscap: защищено лоадером\npcall(setfpscap, 999)")
+src, _ = splice(src, "setfpscap(999)", "pcall(setfpscap, 999)")
 local m1 = 'if workspace:FindFirstChild("VoidPlatform") then'
 local m2 = "local function fn16()"
 local i0, i1 = src:find(m1, 1, true), nil
@@ -81,7 +84,7 @@ end
 src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
 "pcall(function() SaveManager:LoadAutoloadConfig() end)")
 src, _ = splice(src, "EnableSidebarResize = true,",
-"EnableSidebarResize = true,\nEnableCompacting = true,\nSidebarCompacted = false,\nMinSidebarWidth = 200,\nSidebarCompactWidth = 56,")
+"EnableSidebarResize = true,\nEnableCompacting = true,\nSidebarCompacted = false,\nMinSidebarWidth = 160,\nSidebarCompactWidth = 56,")
 src, _ = splice(src, "Window:SetSidebarWidth(125)", [====[
 Window:SetSidebarWidth(160)
 task.delay(1.5, function()
@@ -100,11 +103,6 @@ end
 local sb = nil
 for _, d in ipairs(gui:GetDescendants()) do
 if d:IsA("TextBox") and (d.Name:lower():find("search") or (d.PlaceholderText or ""):lower():find("search")) then sb = d break end
-end
-if not sb then
-for _, d in ipairs(gui:GetDescendants()) do
-if d:IsA("TextBox") then sb = d break end
-end
 end
 if not sb then return end
 local btn = Instance.new("TextButton")
