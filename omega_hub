@@ -38,22 +38,8 @@ ico = ico:gsub("lucide%-icons", "omega-lucide-icons")
 lib = lib:gsub('"Obsidian/', '"OmegaHub/')
 tm = tm:gsub('"Obsidian/', '"OmegaHub/')
 sm = sm:gsub('"Obsidian/', '"OmegaHub/')
-src = src:gsub('Title = "Nil\'e"', 'Title = "NEIL NO KEY V2"')
+src = src:gsub('Title = "Nil\'e"', 'Title = "Нил без ключа"')
 src, _ = splice(src, "CornerRadius = 8,", "Icon = \"rocket\",\nCornerRadius = 20,")
-local function rep(s, old, new)
-repeat
-local done
-s, done = splice(s, old, new)
-until not done
-return s
-end
-src = rep(src, '"layout-dashboard"', '"settings"')
-src = rep(src, '"shield-cog-corner"', '"shield"')
-src = rep(src, '"locate-fixed"', '"crosshair"')
-src = rep(src, '"clapperboard"', '"person-standing"')
-src = rep(src, '"rotate-3d"', '"zap"')
-src = rep(src, '"bubbles"', '"eye"')
-src = rep(src, '"cog"', '"sliders-horizontal"')
 local old_icons = "local FetchIcons, Icons = pcall(function()" ..
 "\n    return (loadstring(" ..
 "\n        game:HttpGet(\"https://raw.githubusercontent.com/" ..
@@ -92,7 +78,7 @@ pcall(function()
 local gui = (typeof(Library) == "table" and Library.ScreenGui) or nil
 if not gui then return end
 for _, d in ipairs(gui:GetDescendants()) do
-if d:IsA("TextLabel") and d.Text == "NEIL NO KEY V2" then
+if d:IsA("TextLabel") and d.Text == "Нил без ключа" then
 pcall(function()
 d.TextSize = 13
 d.TextScaled = false
