@@ -1,4 +1,4 @@
-warn("[Omega Hub] v3.0 — новая версия загружена " .. os.date("%H:%M:%S"))
+warn("[Omega Hub] v3.0 — new version loaded " .. os.date("%H:%M:%S"))
 pcall(setfpscap, 999)
 if typeof(getgenv) ~= "function" then getgenv = function() return _G end end
 if typeof(writefile) ~= "function" then writefile = function() return false end end
@@ -10,6 +10,9 @@ if typeof(makefolder) ~= "function" then makefolder = function() end end
 if typeof(listfiles) ~= "function" then listfiles = function() return {} end end
 if typeof(setclipboard) ~= "function" then setclipboard = function() return false end end
 if typeof(getcustomasset) ~= "function" then getcustomasset = function() return nil end end
+local function say(en, ru)
+if _G.NEIL_LANG_RU then warn("[Omega Hub] " .. ru) else warn("[Omega Hub] " .. en) end
+end
 local function splice(s, old, new)
 local a, b = s:find(old, 1, true)
 if not a then return s, false end
@@ -26,7 +29,7 @@ ok = pcall(function() body = game:HttpGet(mirror) end)
 end
 end
 assert(ok and type(body) == "string" and #body > (min or 1000),
-"[Omega Hub] Не скачался (и через зеркало тоже): " .. url)
+"[Omega Hub] Download failed (mirror too): " .. url)
 return body
 end
 local src = dl("https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua", 100000)
@@ -38,7 +41,7 @@ ico = ico:gsub("lucide%-icons", "omega-lucide-icons")
 lib = lib:gsub('"Obsidian/', '"OmegaHub/')
 tm = tm:gsub('"Obsidian/', '"OmegaHub/')
 sm = sm:gsub('"Obsidian/', '"OmegaHub/')
-src = src:gsub('Title = "Nil\'e"', 'Title = "Нил без ключа"')
+src = src:gsub('Title = "Nil\'e"', 'Title = "NEIL NO KEY V2"')
 src, _ = splice(src, "CornerRadius = 8,", "Icon = \"rocket\",\nCornerRadius = 20,")
 local old_icons = "local FetchIcons, Icons = pcall(function()" ..
 "\n    return (loadstring(" ..
@@ -53,7 +56,7 @@ local new_icons = "local FetchIcons, Icons = pcall(function()" ..
 "\nend)"
 local ok1
 lib, ok1 = splice(lib, old_icons, new_icons)
-if not ok1 then warn("[Omega Hub] якорь иконок не найден — грузим Icons напрямую") end
+if not ok1 then warn("[Omega Hub] icons anchor not found — loading Icons directly") end
 src, _ = splice(src, "setfpscap(999)", "pcall(setfpscap, 999)")
 local m1 = 'if workspace:FindFirstChild("VoidPlatform") then'
 local m2 = "local function fn16()"
@@ -65,7 +68,7 @@ if i0 and i1 then
 local block = src:sub(i0, i1 - 1):match("^(.-)%s*$")
 src = src:sub(1, i0 - 1) .. "pcall(function()\n" .. block .. "\nend)\n\n" .. src:sub(i1)
 else
-warn("[Omega Hub] якорь блока карты не найден — пропускаю патч")
+warn("[Omega Hub] map block anchor not found — skipping patch")
 end
 src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
 "pcall(function() SaveManager:LoadAutoloadConfig() end)")
@@ -78,13 +81,23 @@ pcall(function()
 local gui = (typeof(Library) == "table" and Library.ScreenGui) or nil
 if not gui then return end
 for _, d in ipairs(gui:GetDescendants()) do
-if d:IsA("TextLabel") and d.Text == "Нил без ключа" then
+if d:IsA("TextLabel") and d.Text == "NEIL NO KEY V2" then
 pcall(function()
 d.TextSize = 13
 d.TextScaled = false
 d.TextTruncate = Enum.TextTruncate.AtEnd
 end)
 end
+end
+if typeof(Tabs) == "table" and (Tabs["UI Settings"] or Tabs.Settings) then
+pcall(function()
+local gb = (Tabs["UI Settings"] or Tabs.Settings):AddLeftGroupbox("Language", "globe")
+gb:AddToggle("NEILLangToggle", {
+Text = "Russian Console",
+Default = false,
+Callback = function(v) _G.NEIL_LANG_RU = v end,
+})
+end)
 end
 local sb = nil
 for _, d in ipairs(gui:GetDescendants()) do
@@ -124,11 +137,11 @@ local ok, res = pcall(loadstring(code))
 if ok and res then
 _G["NILE_" .. tag] = res
 else
-warn("[Omega Hub] модуль " .. tag .. " не загрузился: " .. tostring(res))
+say("module " .. tag .. " failed to load: " .. tostring(res), "модуль " .. tag .. " не загрузился: " .. tostring(res))
 end
 end
 _load(lib, "LIB"); _load(tm, "TM"); _load(sm, "SM")
-assert(_G.NILE_LIB, "[Omega Hub] библиотека UI не загрузилась — запуск невозможен")
+assert(_G.NILE_LIB, "[Omega Hub] UI library failed to load — cannot start")
 if not _G.NILE_TM then _G.NILE_TM = setmetatable({}, { __index = function() return function() end end }) end
 if not _G.NILE_SM then _G.NILE_SM = setmetatable({}, { __index = function() return function() end end }) end
 src, _ = splice(src, 'Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua"))()', "Library = _G.NILE_LIB")
@@ -137,5 +150,5 @@ src, _ = splice(src, 'SaveManager = loadstring(game:HttpGet("https://raw.githubu
 src = "local Library, ThemeManager, SaveManager = _G.NILE_LIB, _G.NILE_TM, _G.NILE_SM\n" .. src
 local ok, err = pcall(loadstring(src))
 if not ok then
-error("[Omega Hub] ошибка запуска: " .. tostring(err))
+error("[Omega Hub] start error: " .. tostring(err))
 end
