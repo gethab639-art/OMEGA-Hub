@@ -19,18 +19,21 @@ if not a then return s, false end
 return s:sub(1, a - 1) .. new .. s:sub(b + 1), true
 end
 local function dl(url, min)
-local body = nil
-local ok = pcall(function() body = game:HttpGet(url) end)
-if not (ok and type(body) == "string" and #body > (min or 1000)) then
+for i = 1, 3 do
+local ok, body = pcall(function() return game:HttpGet(url) end)
+if ok and type(body) == "string" and #body > (min or 1000) then return body end
+if i < 3 then task.wait(0.4 * i) end
+end
 local mirror = url:gsub("^https://raw%.githubusercontent%.com/([^/]+)/([^/]+)/refs/heads/([^/]+)/(.+)$",
 "https://cdn.jsdelivr.net/gh/%1/%2@%3/%4")
 if mirror ~= url then
-ok = pcall(function() body = game:HttpGet(mirror) end)
+for i = 1, 2 do
+local ok, body = pcall(function() return game:HttpGet(mirror) end)
+if ok and type(body) == "string" and #body > (min or 1000) then return body end
+if i < 2 then task.wait(0.4) end
 end
 end
-assert(ok and type(body) == "string" and #body > (min or 1000),
-"[Omega Hub] Download failed (mirror too): " .. url)
-return body
+error("[Omega Hub] Download failed after retries: " .. url)
 end
 local src = dl("https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua", 100000)
 local lib = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua", 100000)
