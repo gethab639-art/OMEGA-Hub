@@ -95,7 +95,14 @@ local gb = (Tabs["UI Settings"] or Tabs.Settings):AddLeftGroupbox("Language", "g
 gb:AddToggle("NEILLangToggle", {
 Text = "Russian Console",
 Default = false,
-Callback = function(v) _G.NEIL_LANG_RU = v end,
+Callback = function(v)
+_G.NEIL_LANG_RU = v
+if v then
+warn("[Omega Hub] Язык консоли: РУССКИЙ")
+else
+warn("[Omega Hub] Console language: ENGLISH")
+end
+end,
 })
 end)
 end
