@@ -62,6 +62,7 @@ local new_icons = "local FetchIcons, Icons = pcall(function()" ..
 "\n" .. ico ..
 "\n]=====]) :: any)()" ..
 "\nend)"
+local ok1
 lib, ok1 = splice(lib, old_icons, new_icons)
 if not ok1 then warn("[Omega Hub] якорь иконок не найден — грузим Icons напрямую") end
 src, _ = splice(src, "setfpscap(999)", "-- setfpscap: защищено лоадером\npcall(setfpscap, 999)")
@@ -134,7 +135,7 @@ end)
 end)
 end)
 ]====])
-_load = function(code, tag)
+local _load = function(code, tag)
 local ok, res = pcall(loadstring(code))
 if ok and res then
 _G["NILE_" .. tag] = res
@@ -149,6 +150,7 @@ if not _G.NILE_SM then _G.NILE_SM = setmetatable({}, { __index = function() retu
 src, _ = splice(src, 'Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua"))()', "Library = _G.NILE_LIB")
 src, _ = splice(src, 'ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua"))()', "ThemeManager = _G.NILE_TM")
 src, _ = splice(src, 'SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua"))()', "SaveManager = _G.NILE_SM")
+src = "local Library, ThemeManager, SaveManager = _G.NILE_LIB, _G.NILE_TM, _G.NILE_SM\n" .. src
 local ok, err = pcall(loadstring(src))
 if not ok then
 error("[Omega Hub] ошибка запуска: " .. tostring(err))
