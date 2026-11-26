@@ -42,7 +42,7 @@ lib = lib:gsub('"Obsidian/', '"OmegaHub/')
 tm = tm:gsub('"Obsidian/', '"OmegaHub/')
 sm = sm:gsub('"Obsidian/', '"OmegaHub/')
 src = src:gsub('Title = "Nil\'e"', 'Title = "NEIL NO KEY V2"')
-src, _ = splice(src, "CornerRadius = 8,", "Icon = \"rocket\",\nCornerRadius = 20,")
+src = splice(src, "CornerRadius = 8,", "Icon = \"rocket\",\nCornerRadius = 20,")
 local old_icons = "local FetchIcons, Icons = pcall(function()" ..
 "\n    return (loadstring(" ..
 "\n        game:HttpGet(\"https://raw.githubusercontent.com/" ..
@@ -57,10 +57,10 @@ local new_icons = "local FetchIcons, Icons = pcall(function()" ..
 local ok1
 lib, ok1 = splice(lib, old_icons, new_icons)
 if not ok1 then warn("[Omega Hub] icons anchor not found — loading Icons directly") end
-src, _ = splice(src, "setfpscap(999)", "pcall(setfpscap, 999)")
+src = splice(src, "setfpscap(999)", "pcall(setfpscap, 999)")
 local m1 = 'if workspace:FindFirstChild("VoidPlatform") then'
 local m2 = "local function fn16()"
-local i0, i1 = src:find(m1, 1, true), nil
+local i0, i1 = src:find(m1, 1, true)
 if i0 then
 i1 = src:find(m2, i0, true)
 end
@@ -70,11 +70,11 @@ src = src:sub(1, i0 - 1) .. "pcall(function()\n" .. block .. "\nend)\n\n" .. src
 else
 warn("[Omega Hub] map block anchor not found — skipping patch")
 end
-src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
+src = splice(src, "SaveManager:LoadAutoloadConfig()",
 "pcall(function() SaveManager:LoadAutoloadConfig() end)")
-src, _ = splice(src, "EnableSidebarResize = true,",
+src = splice(src, "EnableSidebarResize = true,",
 "EnableSidebarResize = true,\nEnableCompacting = true,\nSidebarCompacted = false,\nMinSidebarWidth = 160,\nSidebarCompactWidth = 56,")
-src, _ = splice(src, "Window:SetSidebarWidth(125)", [====[
+src = splice(src, "Window:SetSidebarWidth(125)", [====[
 Window:SetSidebarWidth(160)
 task.delay(1.5, function()
 pcall(function()
@@ -275,6 +275,18 @@ end
 if typeof(Tabs) == "table" and (Tabs["UI Settings"] or Tabs.Settings) then
 pcall(function()
 local gb = (Tabs["UI Settings"] or Tabs.Settings):AddLeftGroupbox("Language", "globe")
+pcall(function()
+local f = (typeof(gb) == "table" and (gb.Frame or gb.Holder)) or nil
+if typeof(f) == "Instance" and f:IsA("GuiObject") then
+f.LayoutOrder = -1
+local p = f.Parent
+if p then
+for _, c in ipairs(p:GetChildren()) do
+if c:IsA("UIListLayout") then c.SortOrder = Enum.SortOrder.LayoutOrder end
+end
+end
+end
+end)
 gb:AddToggle("NEILLangToggle", {
 Text = "Russian Console",
 Default = false,
@@ -290,38 +302,17 @@ end,
 })
 end)
 end
-local seen = {}
-local function collect()
-for _, d in ipairs(gui:GetDescendants()) do
-if d:IsA("TextLabel") or d:IsA("TextButton") then
-local t = d.Text
-if t and #t >= 2 and #t <= 40 and not t:match("^[%d%p%s]+$") then seen[t] = true end
-end
-end
-end
-pcall(collect)
 pcall(function()
 gui.DescendantAdded:Connect(function(d)
 pcall(function()
-if d:IsA("TextLabel") or d:IsA("TextButton") then
-local t = d.Text
-if t and #t >= 2 and #t <= 40 and not t:match("^[%d%p%s]+$") then seen[t] = true end
-if _G.NEIL_LANG_RU then
+if _G.NEIL_LANG_RU and (d:IsA("TextLabel") or d:IsA("TextButton")) then
 task.delay(0.1, function() pcall(function()
 local n = tr(d.Text, D)
 if n then d.Text = n end
 end) end)
 end
-end
 end)
 end)
-end)
-task.delay(5, function()
-local list = {}
-for t in pairs(seen) do table.insert(list, t) end
-table.sort(list)
-pcall(setclipboard, table.concat(list, "\n"))
-warn("[Omega Hub] text list copied to clipboard — paste it in chat (" .. #list .. " items)")
 end)
 local sb = nil
 for _, d in ipairs(gui:GetDescendants()) do
@@ -368,9 +359,9 @@ _load(lib, "LIB"); _load(tm, "TM"); _load(sm, "SM")
 assert(_G.NILE_LIB, "[Omega Hub] UI library failed to load — cannot start")
 if not _G.NILE_TM then _G.NILE_TM = setmetatable({}, { __index = function() return function() end end }) end
 if not _G.NILE_SM then _G.NILE_SM = setmetatable({}, { __index = function() return function() end end }) end
-src, _ = splice(src, 'Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua"))()', "Library = _G.NILE_LIB")
-src, _ = splice(src, 'ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua"))()', "ThemeManager = _G.NILE_TM")
-src, _ = splice(src, 'SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua"))()', "SaveManager = _G.NILE_SM")
+src = splice(src, 'Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua"))()', "Library = _G.NILE_LIB")
+src = splice(src, 'ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua"))()', "ThemeManager = _G.NILE_TM")
+src = splice(src, 'SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua"))()', "SaveManager = _G.NILE_SM")
 src = "local Library, ThemeManager, SaveManager = _G.NILE_LIB, _G.NILE_TM, _G.NILE_SM\n" .. src
 local ok, err = pcall(loadstring(src))
 if not ok then
