@@ -1,164 +1,155 @@
--- OMEGA MINI HUB v1.0 — FTAP (Delta)
--- Свой хаб: один файл, без скачиваний, работает без VPN
-local RS = game:GetService("ReplicatedStorage")
-local PS = game:GetService("Players")
-local RunS = game:GetService("RunService")
-local LP = PS.LocalPlayer
-char = LP.Character or LP.CharacterAdded:Wait()
-LP.CharacterAdded:Connect(function(c) char = c end)
-local SNO = RS:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner")
-local DestroyToy = RS:WaitForChild("MenuToys"):WaitForChild("DestroyToy")
-local conns = {}
-local function hrp() return char and char:FindFirstChild("HumanoidRootPart") end
-local function nearest()
-local best, bd = nil, math.huge
-for _, p in ipairs(PS:GetPlayers()) do
-if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and hrp() then
-local d = (p.Character.HumanoidRootPart.Position - hrp().Position).Magnitude
-if d < bd then best, bd = p, d end
+warn("[Omega Hub] v3.0 — новая версия загружена " .. os.date("%H:%M:%S"))
+pcall(setfpscap, 999)
+if typeof(getgenv) ~= "function" then getgenv = function() return _G end end
+if typeof(writefile) ~= "function" then writefile = function() return false end end
+if typeof(readfile) ~= "function" then readfile = function() return nil end end
+if typeof(delfile) ~= "function" then delfile = function() end end
+if typeof(isfile) ~= "function" then isfile = function() return false end end
+if typeof(isfolder) ~= "function" then isfolder = function() return false end end
+if typeof(makefolder) ~= "function" then makefolder = function() end end
+if typeof(listfiles) ~= "function" then listfiles = function() return {} end end
+if typeof(setclipboard) ~= "function" then setclipboard = function() return false end end
+if typeof(getcustomasset) ~= "function" then getcustomasset = function() return nil end end
+local function splice(s, old, new)
+local a, b = s:find(old, 1, true)
+if not a then return s, false end
+return s:sub(1, a - 1) .. new .. s:sub(b + 1), true
+end
+local function dl(url, min)
+local body = nil
+local ok = pcall(function() body = game:HttpGet(url) end)
+if not (ok and type(body) == "string" and #body > (min or 1000)) then
+local mirror = url:gsub("^https://raw%.githubusercontent%.com/([^/]+)/([^/]+)/refs/heads/([^/]+)/(.+)$",
+"https://cdn.jsdelivr.net/gh/%1/%2@%3/%4")
+if mirror ~= url then
+ok = pcall(function() body = game:HttpGet(mirror) end)
 end
 end
-return best
+assert(ok and type(body) == "string" and #body > (min or 1000),
+"[Omega Hub] Не скачался (и через зеркало тоже): " .. url)
+return body
 end
-local function dropVoid(part)
-if not part then return end
-local h = workspace.FallenPartsDestroyHeight
-SNO:FireServer(part, part.CFrame)
-part.CFrame = CFrame.new(0, -50000, 0)
-task.wait(0.1)
-workspace.FallenPartsDestroyHeight = -45000
-task.wait()
-workspace.FallenPartsDestroyHeight = h
+local src = dl("https://raw.githubusercontent.com/sixjdnesmsjnajsn-cmd/Nile/refs/heads/main/Nile.lua", 100000)
+local lib = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua", 100000)
+local tm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua", 1000)
+local sm  = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua", 1000)
+local ico = dl("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Icons.Lua", 10000)
+ico = ico:gsub("lucide%-icons", "omega-lucide-icons")
+lib = lib:gsub('"Obsidian/', '"OmegaHub/')
+tm = tm:gsub('"Obsidian/', '"OmegaHub/')
+sm = sm:gsub('"Obsidian/', '"OmegaHub/')
+src = src:gsub('Title = "Nil\'e"', 'Title = "NEIL NO KEY V2"')
+src, _ = splice(src, "CornerRadius = 8,", "Icon = \"rocket\",\nCornerRadius = 20,")
+local function rep(s, old, new)
+repeat
+local done
+s, done = splice(s, old, new)
+until not done
+return s
 end
-local gui = Instance.new("ScreenGui")
-gui.Name = "OMEGA_MINI_HUB"
-gui.ResetOnSpawn = false
-pcall(function() gui.Parent = (typeof(gethui) == "function" and gethui()) or game:GetService("CoreGui") end)
-local panel = Instance.new("Frame")
-panel.Size = UDim2.fromOffset(200, 290)
-panel.Position = UDim2.fromOffset(10, 180)
-panel.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-panel.Active = true
-panel.Parent = gui
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 34)
-title.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
-title.TextColor3 = Color3.fromRGB(150, 110, 255)
-title.Font = Enum.Font.Code
-title.TextSize = 14
-title.Text = "OMEGA MINI"
-title.Parent = panel
-local drag = false
-title.InputBegan:Connect(function(i)
-if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then drag = true end
-end)
-title.InputEnded:Connect(function(i)
-if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then drag = false end
-end)
-RunS.RenderStepped:Connect(function()
-if drag then
-local m = LP:GetMouse()
-panel.Position = UDim2.fromOffset(m.X - 100, m.Y - 17)
+src = rep(src, '"layout-dashboard"', '"settings"')
+src = rep(src, '"shield-cog-corner"', '"shield"')
+src = rep(src, '"locate-fixed"', '"crosshair"')
+src = rep(src, '"clapperboard"', '"person-standing"')
+src = rep(src, '"rotate-3d"', '"zap"')
+src = rep(src, '"bubbles"', '"eye"')
+src = rep(src, '"cog"', '"sliders-horizontal"')
+local old_icons = "local FetchIcons, Icons = pcall(function()" ..
+"\n    return (loadstring(" ..
+"\n        game:HttpGet(\"https://raw.githubusercontent.com/" ..
+"ludicious-claw/sssss/refs/heads/main/Icons.Lua\")" ..
+"\n    ) :: () -> IconModule)()" ..
+"\nend)"
+local new_icons = "local FetchIcons, Icons = pcall(function()" ..
+"\n    return (loadstring([=====[" ..
+"\n" .. ico ..
+"\n]=====]) :: any)()" ..
+"\nend)"
+local ok1
+lib, ok1 = splice(lib, old_icons, new_icons)
+if not ok1 then warn("[Omega Hub] якорь иконок не найден — грузим Icons напрямую") end
+src, _ = splice(src, "setfpscap(999)", "pcall(setfpscap, 999)")
+local m1 = 'if workspace:FindFirstChild("VoidPlatform") then'
+local m2 = "local function fn16()"
+local i0, i1 = src:find(m1, 1, true), nil
+if i0 then
+i1 = src:find(m2, i0, true)
 end
-end)
-local function mkbtn(txt, n)
-local b = Instance.new("TextButton")
-b.Size = UDim2.new(1, -12, 0, 38)
-b.Position = UDim2.new(0, 6, 0, 40 + (n - 1) * 42)
-b.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-b.TextColor3 = Color3.new(1, 1, 1)
-b.Font = Enum.Font.Code
-b.TextSize = 13
-b.Text = txt
-b.Parent = panel
-return b
-end
-local function togglebtn(b, on)
-b.BackgroundColor3 = on and Color3.fromRGB(90, 60, 200) or Color3.fromRGB(35, 35, 42)
-end
-local bAF = mkbtn("Anti Fling", 1)
-local bVoid = mkbtn("Void Platform", 2)
-local bFling = mkbtn("Флинг ближнего", 3)
-local bKill = mkbtn("Сброс ближнего", 4)
-local bToys = mkbtn("Убрать мои вещи", 5)
-local bSpeed = mkbtn("Скорость 100", 6)
-local bHide = mkbtn("Скрыть", 7)
-bAF.MouseButton1Click:Connect(function()
-bAF_on = not bAF_on
-togglebtn(bAF, bAF_on)
-if bAF_on then
-conns.af = RunS.RenderStepped:Connect(function()
-if char and char:FindFirstChild("Torso") then
-char.Torso.CollisionGroupId = 5
-char.Head.CollisionGroupId = 5
-if char:FindFirstChild("HumanoidRootPart") then char.HumanoidRootPart.CollisionGroupId = 5 end
-end
-end)
-elseif conns.af then
-conns.af:Disconnect()
-conns.af = nil
-end
-end)
-bVoid.MouseButton1Click:Connect(function()
-bVoid_on = not bVoid_on
-togglebtn(bVoid, bVoid_on)
-if bVoid_on then
-local vp = Instance.new("Part")
-vp.Name = "OMEGA_VoidPlatform"
-vp.Shape = Enum.PartType.Ball
-vp.Material = Enum.Material.Air
-vp.CFrame = CFrame.new(0, -522.5, 0)
-vp.Size = Vector3.new(50, 500, 500)
-vp.Anchored = true
-vp.Transparency = 0.25
-vp.Color = Color3.new(0, 0, 0)
-vp.Parent = workspace
+if i0 and i1 then
+local block = src:sub(i0, i1 - 1):match("^(.-)%s*$")
+src = src:sub(1, i0 - 1) .. "pcall(function()\n" .. block .. "\nend)\n\n" .. src:sub(i1)
 else
-local old = workspace:FindFirstChild("OMEGA_VoidPlatform")
-if old then old:Destroy() end
+warn("[Omega Hub] якорь блока карты не найден — пропускаю патч")
 end
+src, _ = splice(src, "SaveManager:LoadAutoloadConfig()",
+"pcall(function() SaveManager:LoadAutoloadConfig() end)")
+src, _ = splice(src, "EnableSidebarResize = true,",
+"EnableSidebarResize = true,\nEnableCompacting = true,\nSidebarCompacted = false,\nMinSidebarWidth = 160,\nSidebarCompactWidth = 56,")
+src, _ = splice(src, "Window:SetSidebarWidth(125)", [====[
+Window:SetSidebarWidth(160)
+task.delay(1.5, function()
+pcall(function()
+local gui = (typeof(Library) == "table" and Library.ScreenGui) or nil
+if not gui then return end
+for _, d in ipairs(gui:GetDescendants()) do
+if d:IsA("TextLabel") and d.Text == "NEIL NO KEY V2" then
+pcall(function()
+d.TextSize = 13
+d.TextScaled = false
+d.TextTruncate = Enum.TextTruncate.AtEnd
 end)
-bFling.MouseButton1Click:Connect(function()
-local t = nearest()
-if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-local p = t.Character.HumanoidRootPart
-SNO:FireServer(p, p.CFrame)
-p.AssemblyAngularVelocity = Vector3.new(0, 1000000, 0)
-p.AssemblyLinearVelocity = Vector3.new(0, 5000, 0)
-end
-end)
-bKill.MouseButton1Click:Connect(function()
-local t = nearest()
-if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
-dropVoid(t.Character.HumanoidRootPart)
-end
-end)
-bToys.MouseButton1Click:Connect(function()
-local folder = workspace:FindFirstChild(LP.Name .. "SpawnedInToys")
-if folder then
-for _, t in ipairs(folder:GetChildren()) do
-DestroyToy:FireServer(t)
 end
 end
+local sb = nil
+for _, d in ipairs(gui:GetDescendants()) do
+if d:IsA("TextBox") and (d.Name:lower():find("search") or (d.PlaceholderText or ""):lower():find("search")) then sb = d break end
+end
+if not sb then return end
+local btn = Instance.new("TextButton")
+btn.Name = "NEILSideToggle"
+btn.Size = UDim2.new(0, 24, 0, 24)
+btn.AnchorPoint = Vector2.new(1, 0.5)
+btn.Position = UDim2.new(1, -2, 0.5, 0)
+btn.BackgroundColor3 = Color3.fromRGB(30, 30, 34)
+btn.BackgroundTransparency = 0.15
+btn.Text = "<<"
+btn.TextColor3 = Color3.new(1, 1, 1)
+btn.Font = Enum.Font.Code
+btn.TextSize = 13
+btn.Parent = sb.Parent
+pcall(function() sb.Size = UDim2.new(1, -30, 1, 0) end)
+local wide = true
+btn.MouseButton1Click:Connect(function()
+wide = not wide
+if wide then
+if Window.SetCompact then pcall(Window.SetCompact, Window, false) end
+if Window.SetSidebarWidth then pcall(Window.SetSidebarWidth, Window, 160) end
+btn.Text = "<<"
+else
+if Window.SetCompact then pcall(Window.SetCompact, Window, true) end
+btn.Text = ">>"
+end
 end)
-bSpeed.MouseButton1Click:Connect(function()
-bSpeed_on = not bSpeed_on
-togglebtn(bSpeed, bSpeed_on)
-if hum() then hum().WalkSpeed = bSpeed_on and 100 or 16 end
 end)
-bHide.MouseButton1Click:Connect(function()
-panel.Visible = false
 end)
-local dot = Instance.new("TextButton")
-dot.Size = UDim2.fromOffset(40, 40)
-dot.Position = UDim2.fromOffset(10, 10)
-dot.BackgroundColor3 = Color3.fromRGB(90, 60, 200)
-dot.TextColor3 = Color3.new(1, 1, 1)
-dot.Font = Enum.Font.Code
-dot.TextSize = 16
-dot.Text = "O"
-dot.Parent = gui
-dot.MouseButton1Click:Connect(function()
-panel.Visible = not panel.Visible
-end)
-warn("[OMEGA MINI] v1.0 загружен — без скачиваний")
+]====])
+local _load = function(code, tag)
+local ok, res = pcall(loadstring(code))
+if ok and res then
+_G["NILE_" .. tag] = res
+else
+warn("[Omega Hub] модуль " .. tag .. " не загрузился: " .. tostring(res))
+end
+end
+_load(lib, "LIB"); _load(tm, "TM"); _load(sm, "SM")
+assert(_G.NILE_LIB, "[Omega Hub] библиотека UI не загрузилась — запуск невозможен")
+if not _G.NILE_TM then _G.NILE_TM = setmetatable({}, { __index = function() return function() end end }) end
+if not _G.NILE_SM then _G.NILE_SM = setmetatable({}, { __index = function() return function() end end }) end
+src, _ = splice(src, 'Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/Librarya.lua"))()', "Library = _G.NILE_LIB")
+src, _ = splice(src, 'ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/ThemeManager.lua"))()', "ThemeManager = _G.NILE_TM")
+src, _ = splice(src, 'SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ludicious-claw/sssss/refs/heads/main/SaveManager.lua"))()', "SaveManager = _G.NILE_SM")
+src = "local Library, ThemeManager, SaveManager = _G.NILE_LIB, _G.NILE_TM, _G.NILE_SM\n" .. src
+local ok, err = pcall(loadstring(src))
+if not ok then
+error("[Omega Hub] ошибка запуска: " .. tostring(err))
+end
